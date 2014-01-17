@@ -1,0 +1,14 @@
+{
+  "name": "poc",
+  "version": "0.0.1",
+  "description": "ContentDB POC",
+  "scripts": {
+  	"start": "node app",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+        "express": "3.3.4",
+        "markdown": "*",
+        "aws-sdk": "*"
+    }
+}
