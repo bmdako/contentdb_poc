@@ -12,15 +12,14 @@
     <br><br><br><br>
     <div class="row">
         <div class="col-md-8">
-            <!-- <p><input class="form-control" type="text" ng-attr-value="{{articleid}}" placeholder="ID"/></p> -->
-            <p><input class="form-control" type="text" ng-model="article['Article ID'].S" placeholder="ID"/></p>
-            <p><input class="form-control" type="text" ng-attr-value="{{test}}" placeholder="Supertitle"/></p>
-            <p><input class="form-control" type="text" ng-attr-value="{{}}" placeholder="Summary"/></p>
-            <p><textarea id="editor" class="form-control" ng-model="article.Article.S" rows="20" placeholder="Br&oslash;dtext"></textarea></p>
-            <p><input class="form-control" type="text" ng-attr-value="{{}}" placeholder="Primary Term"/></p>
-            <p><input class="form-control" type="text" ng-attr-value="{{}}" placeholder="Topic Pages"/></p>
-            <p><input class="form-control" type="text" ng-attr-value="{{}}" placeholder="Pr&aelig;sentations Tags"/></p>
-            <p><input class="form-control" type="text" ng-attr-value="{{}}" placeholder="Pris/Abonnement"/></p>
+            <p><input class="form-control" type="text" ng-model="article.id" placeholder="ID"/></p>
+            <p><input class="form-control" type="text" ng-model="article.supertitel" placeholder="Supertitle"/></p>
+            <p><input class="form-control" type="text" ng-model="article.summary" placeholder="Summary"/></p>
+            <p><textarea class="form-control" ng-model="article.tekst" rows="20" placeholder="Br&oslash;dtext"></textarea></p>
+            <p><input class="form-control" type="text" ng-model="article.primaryTerm" placeholder="Primary Term"/></p>
+            <p><input class="form-control" type="text" ng-model="article.topicPages" placeholder="Topic Pages"/></p>
+            <p><input class="form-control" type="text" ng-model="article.presentationTags" placeholder="Pr&aelig;sentations Tags"/></p>
+            <p><input class="form-control" type="text" ng-model="article.prisAbonnement" placeholder="Pris/Abonnement"/></p>
         </div>
         <div class="col-md-4">
             <p>
@@ -28,14 +27,14 @@
                 <a class="preview" target="_blank" href="/raw/{{articleid}}">Preview</a>
             </p>
             <p>
-                <a href="/editor">Ghostdown demo</a>
+                <a href="/ghostdown.html">Ghostdown demo</a>
             </p>
             <h4>Artikler</h4>
             <p>Filter: <input class="form-control input-sm" style="width:50%;height:20px;display:inline-block" type="text" ng-model="query"></p>
             <p ng-repeat="article in articles | filter:query">
                 <button type="button" class="btn btn-info btn-xs" ng-click="getArticle(article['Article ID'].S)">Load</button>
                 <abbr ng-attr-title="{{article.Article.S}}" class="initialism">{{article['Article ID'].S}}</abbr>
-                <span class="glyphicon glyphicon-remove" ng-click="deleteArticle(article['Article ID'].S)" style="float:right;" />
+                <span class="glyphicon glyphicon-remove" ng-click="deleteArticle($index, article['Article ID'].S)" style="float:right;" />
             </p>
         </div>
     </div>
@@ -50,18 +49,14 @@
 
         $scope.article = {
             id: undefined,
-            body: "",
-            title: ""
-//             Supertitle: Ballet
-// Rubrik: Russiske svaner i den skønneste dans på Gamle Scene
-// Summary: Mariinskij Balletten åbnede sit store gæstespil med en traditionel, men uhyre smuk, lyrisk og stilren version af »Svanesøen«.
-// Primary term: www.b.dk > Kultur > Scene
-// Nodequeues
-// Article elements (default)
-// Article elements (embedded)
-// Topic Pages: Ballet, Svanesøen, Det Konglelige Teater
-// Presentation tage: www.b.dk > Artikel > Lille billede
-// Pris/Abonnement
+            tekst: "",
+            supertitel: "",
+            rubrik: "",
+            summary: "",
+            primaryTerm: "",
+            topicPages: "",
+            presentationTags: "",
+            prisAbonnement: ""
         }
 
         $http.get("/articles").success(function(data){
@@ -95,8 +90,10 @@
             // }
         }
 
-        $scope.deleteArticle = function(id) {
-            console.log("delete " + id)
+        $scope.deleteArticle = function(index, id) {
+            $http.delete("/" + id).success(function(data) {
+                $scope.articles.splice(index, 1)
+            })
         }
     })
 }(jQuery)

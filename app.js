@@ -12,55 +12,56 @@ app.get('/', function(request, response) {
     response.sendfile('./web/index.html')
 })
 
-app.get('/editor', function(request, response) {
-    response.sendfile('./web/ghostdown.html')
-})
-
-app.get('/editor/:id', function(request, response) {
-	//TODO: Load the article into the editor
-    response.sendfile('./web/ghostdown.html')
-})
-
 app.get("/articles", function(request, response){
-	repository.scanArticles(function(data){
-		response.send(data)
-	})
-})
-
-app.get('/raw/:id', function(request, response) {
-	repository.getArticle(request.params.id, function(data){
-		if (data !== undefined && data.Article.S !== undefined) {
-	    	response.send(200, data.Article.S)
+	repository.scanArticles(function(err, data){
+		if (data) {
+	    	response.send(200, data.Items)
 	    } else {
-	    	response.send(404)
+	    	response.send(500, err)
 	    }
 	})
 })
 
+app.get('/markdown/:id', function(request, response) {
+	response.send(501)
+	// repository.getArticleMarkdown(request.params.id, function(err, data){
+	// 	if (data) {
+	//     	response.send(200, data)
+	//     } else {
+	//     	response.send(500, err)
+	//     }
+	// })
+})
+
 app.get('/json/:id', function(request, response) {
-	repository.getArticle(request.params.id, function(data){
-		if (data !== undefined) {
+	repository.getArticle(request.params.id, function(err, data){
+		if (data) {
 	    	response.send(200, data)
 	    } else {
-	    	response.send(404)
+	    	response.send(500, err)
 	    }
 	})
 })
 
 app.get('/:id', function(request, response) {
-	repository.getArticle(request.params.id, function(data) {
-		if (data !== undefined && data.Article.S !== undefined) {
-	    	response.send(200, markdown.toHTML(data.Article.S))
-	    } else {
-	    	response.send(404)
-	    }
-	})
+	response.send(501)
+	// repository.getArticleHtml(request.params.id, function(err, data) {
+	// 	if (data) {
+	//     	response.send(200, markdown.toHTML(data))
+	//     } else {
+	//     	response.send(500, err)
+	//     }
+	// })
 })
 
 app.post('/', function(request, response) {
 	if (request.body.article) {
-		repository.saveArticle(request.body.article, function(data) {
-			response.send(200, data)
+		repository.saveArticle(request.body.article, function(err, data) {
+			if (data) {
+				response.send(200, data)
+			} else {
+				response.send(500, err)
+			}
 		})
 	} else {
 		response.send(400)
@@ -69,12 +70,26 @@ app.post('/', function(request, response) {
 
 app.put("/:id", function(request, response) {
 	if (request.body.article) {
-		repository.updateArticle(request.params.id, request.body.article, function(data){
-			response.send(200, data)
+		repository.updateArticle(request.params.id, request.body.article, function(err, data){
+			if (data) {
+				response.send(200, data)
+			} else {
+				response.send(500, err)
+			}
 		})
 	} else {
 		response.send(400)
 	}
+})
+
+app.delete("/:id", function(request, response){
+	repository.deleteArticle(request.params.id, function(err, data) {
+		if (data) {
+			response.send(200, data)
+		} else {
+			response.send(500, err)
+		}
+	})
 })
 
 var port = process.env.PORT || 5000
