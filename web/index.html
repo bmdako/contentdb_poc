@@ -14,6 +14,7 @@
         <div class="col-md-8">
             <p><input class="form-control" type="text" ng-model="article.id" placeholder="ID"/></p>
             <p><input class="form-control" type="text" ng-model="article.supertitel" placeholder="Supertitle"/></p>
+            <p><input class="form-control" type="text" ng-model="article.rubrik" placeholder="Rubrik"/></p>
             <p><input class="form-control" type="text" ng-model="article.summary" placeholder="Summary"/></p>
             <p><textarea class="form-control" ng-model="article.tekst" rows="20" placeholder="Br&oslash;dtext"></textarea></p>
             <p><input class="form-control" type="text" ng-model="article.primaryTerm" placeholder="Primary Term"/></p>
@@ -24,7 +25,7 @@
         <div class="col-md-4">
             <p>
                 <button class="btn btn-primary btn-sm" ng-click="saveArticle(articleid)">Gem</button>
-                <a class="preview" target="_blank" href="/raw/{{articleid}}">Preview</a>
+                <a class="preview" target="_blank" href="/{{article.id}}">Preview</a>
             </p>
             <p>
                 <a href="/ghostdown.html">Ghostdown demo</a>
@@ -47,17 +48,7 @@
     var contentdb_poc = angular.module('contentdb_poc', []);
     contentdb_poc.controller('Article', function($scope, $http){
 
-        $scope.article = {
-            id: undefined,
-            tekst: "",
-            supertitel: "",
-            rubrik: "",
-            summary: "",
-            primaryTerm: "",
-            topicPages: "",
-            presentationTags: "",
-            prisAbonnement: ""
-        }
+        $scope.article = {}
 
         $http.get("/articles").success(function(data){
             $scope.articles = data
@@ -65,29 +56,24 @@
 
         $scope.getArticle = function(id){
             $http.get("/json/" + id).success(function(data){
-                // $scope.articleid = id
-                // $scope.articletext = data
                 $scope.article = data
             })
         }
 
         $scope.saveArticle = function(id){
             console.log($scope.article)
-
-            // var temp = $("#editor").val()
-            // var params = {"article": temp}
-            // if (id === undefined)
-            // {
-            //     $http.post("/", params).success(function(data){
-            //         $scope.articleid = id
-            //         $scope.articletext = temp
-            //     })
-            // } else {
-            //     $http.put("/" + id, params).success(function(data){
-            //         $scope.articleid = id
-            //         $scope.articletext = temp
-            //     })
-            // }
+            if ($scope.article.id)
+            {
+                // $http.post("/", $scope.article).success(function(data){
+                //     $scope.articles.pop($scope.article)
+                //     // TODO: Show "OK"
+                // })
+                $http.put("/" + id, $scope.article).success(function(data){
+                    // TODO: Show "OK"
+                    console.log("Saved")
+                })
+            } else {
+            }
         }
 
         $scope.deleteArticle = function(index, id) {

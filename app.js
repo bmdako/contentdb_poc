@@ -22,6 +22,16 @@ app.get("/articles", function(request, response){
 	})
 })
 
+app.get('/json/:id', function(request, response) {
+	repository.getArticle(request.params.id, function(err, data){
+		if (data) {
+	    	response.send(200, data)
+	    } else {
+	    	response.send(500, err)
+	    }
+	})
+})
+
 app.get('/markdown/:id', function(request, response) {
 	response.send(501)
 	// repository.getArticleMarkdown(request.params.id, function(err, data){
@@ -31,16 +41,6 @@ app.get('/markdown/:id', function(request, response) {
 	//     	response.send(500, err)
 	//     }
 	// })
-})
-
-app.get('/json/:id', function(request, response) {
-	repository.getArticle(request.params.id, function(err, data){
-		if (data) {
-	    	response.send(200, data)
-	    } else {
-	    	response.send(500, err)
-	    }
-	})
 })
 
 app.get('/:id', function(request, response) {
@@ -55,8 +55,8 @@ app.get('/:id', function(request, response) {
 })
 
 app.post('/', function(request, response) {
-	if (request.body.article) {
-		repository.saveArticle(request.body.article, function(err, data) {
+	if (request.body) {
+		repository.saveArticle(request.body, function(err, data) {
 			if (data) {
 				response.send(200, data)
 			} else {
@@ -69,8 +69,8 @@ app.post('/', function(request, response) {
 })
 
 app.put("/:id", function(request, response) {
-	if (request.body.article) {
-		repository.updateArticle(request.params.id, request.body.article, function(err, data){
+	if (request.body) {
+		repository.updateArticle(request.params.id, request.body, function(err, data){
 			if (data) {
 				response.send(200, data)
 			} else {

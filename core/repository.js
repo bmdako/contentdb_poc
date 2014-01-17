@@ -12,14 +12,14 @@ module.exports.getArticle = function(id, callback) {
             if (data.Item) {
                 var article = {
                     id: data.Item["Article ID"].S,
-                    tekst: data.Item.Article.S,
-                    supertitel: "",
-                    rubrik: "",
-                    summary: "",
-                    primaryTerm: "",
-                    topicPages: "",
-                    presentationTags: "",
-                    prisAbonnement: ""
+                    tekst: data.Item.Tekst.S,
+                    supertitel: data.Item.Supertitel.S,
+                    rubrik: data.Item.Rubrik.S,
+                    summary: data.Item.Summary.S,
+                    primaryTerm: data.Item.PrimaryTerm.S,
+                    topicPages: data.Item.TopicPages.S,
+                    presentationTags: data.Item.PresentationTags.S,
+                    prisAbonnement: data.Item.PrisAbonnement.S
                 }
                 callback(undefined, article)
             } else {
@@ -39,7 +39,7 @@ module.exports.getArticleHtml = function(id, callback) {
     callback("Not implemented", undefined)
 }
 
-module.exports.saveArticle = function(article, callback) {
+module.exports.saveArticle = function(body, callback) {
     var id = guid()
     var params = {
         TableName: "contentdb_poc",
@@ -52,11 +52,19 @@ module.exports.saveArticle = function(article, callback) {
     })
 }
 
-module.exports.updateArticle = function(id, article, callback) {
+module.exports.updateArticle = function(id, body, callback) {
     var params = {
         TableName: "contentdb_poc",
-        Key: { "Article ID" : {"S" : id } },
-        AttributeUpdates: {"Article": {Value: {"S" : article }}, "Title": {Value:{"S": "For vild"}}}}
+        Key: { "Article ID" : {"S" : body.id } },
+        AttributeUpdates: {
+            "Tekst": {Value: {"S" : body.tekst }},
+            "Supertitel": {Value: {"S": body.supertitel}},
+            "Rubrik": {Value: {"S": body.rubrik}},
+            "Summary": {Value: {"S": body.summary}},
+            "PrimaryTerm": {Value: {"S": body.primaryTerm}},
+            "TopicPages": {Value: {"S": body.topicPages}},
+            "PresentationTags": {Value: {"S": body.presentationTags}},
+            "PrisAbonnement": {Value: {"S": body.prisAbonnement}}}}
 
     dynamodb.updateItem(params, function (err, data) {
         callback(err, data)
