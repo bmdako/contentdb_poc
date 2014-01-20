@@ -9,7 +9,7 @@ var markdown = require( "markdown" ).markdown
 app.use("/", express.static("./client"))
 
 // app.get('/', function(request, response) {
-//     response.sendfile('./web/index.html')
+//     response.sendfile('./client/index.html')
 // })
 
 app.get("/articles", function(request, response){
