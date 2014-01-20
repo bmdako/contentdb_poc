@@ -12,14 +12,14 @@ module.exports.getArticle = function(id, callback) {
             if (data.Item) {
                 var article = {
                     id: data.Item["Article ID"].S,
-                    tekst: data.Item.Tekst.S,
-                    supertitel: data.Item.Supertitel.S,
-                    rubrik: data.Item.Rubrik.S,
-                    summary: data.Item.Summary.S,
-                    primaryTerm: data.Item.PrimaryTerm.S,
-                    topicPages: data.Item.TopicPages.S,
-                    presentationTags: data.Item.PresentationTags.S,
-                    prisAbonnement: data.Item.PrisAbonnement.S
+                    tekst: data.Item.Tekst ? data.Item.Tekst.S : "",
+                    supertitel: data.Item.Supertitel ? data.Item.Supertitel.S : "",
+                    rubrik: data.Item.Rubrik ? data.Item.Rubrik.S : "",
+                    summary: data.Item.Summary ? data.Item.Summary.S : "",
+                    primaryTerm: data.Item.PrimaryTerm ? data.Item.PrimaryTerm.S : "",
+                    topicPages: data.Item.TopicPages ? data.Item.TopicPages.S : "",
+                    presentationTags: data.Item.PresentationTags ? data.Item.PresentationTags.S : "",
+                    prisAbonnement: data.Item.PrisAbonnement ? data.Item.PrisAbonnement.S : ""
                 }
                 callback(undefined, article)
             } else {
@@ -67,6 +67,8 @@ module.exports.updateArticle = function(id, body, callback) {
             "PrisAbonnement": {Value: {"S": body.prisAbonnement}}}}
 
     dynamodb.updateItem(params, function (err, data) {
+        console.log(data)
+        console.log(err)
         callback(err, data)
     })
 }
@@ -87,7 +89,26 @@ module.exports.scanArticles = function(callback) {
     }
 
     dynamodb.scan(params, function(err, data){
-        callback(err, data)
+        if (data) {
+            var temp = []
+            for(var i = 0, bound = data.Count; i < bound; ++i) {
+                var article = {
+                    id: data.Items[i]["Article ID"].S,
+                    tekst: data.Items[i].Tekst ? data.Items[i].Tekst.S : "",
+                    supertitel: data.Items[i].Supertitel ? data.Items[i].Supertitel.S : "",
+                    rubrik: data.Items[i].Rubrik ? data.Items[i].Rubrik.S : "",
+                    summary: data.Items[i].Summary ? data.Items[i].Summary.S : "",
+                    primaryTerm: data.Items[i].PrimaryTerm ? data.Items[i].PrimaryTerm.S : "",
+                    topicPages: data.Items[i].TopicPages ? data.Items[i].TopicPages.S : "",
+                    presentationTags: data.Items[i].PresentationTags ? data.Items[i].PresentationTags.S : "",
+                    prisAbonnement: data.Items[i].PrisAbonnement ? data.Items[i].PrisAbonnement.S : ""
+                }
+                temp.push(article)
+            }
+            callback(err, temp)
+        } else {
+            callback(err, data)
+        }
     })
 }
 

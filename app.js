@@ -15,7 +15,7 @@ app.get('/', function(request, response) {
 app.get("/articles", function(request, response){
 	repository.scanArticles(function(err, data){
 		if (data) {
-	    	response.send(200, data.Items)
+	    	response.send(200, data)
 	    } else {
 	    	response.send(500, err)
 	    }
@@ -32,26 +32,15 @@ app.get('/json/:id', function(request, response) {
 	})
 })
 
-app.get('/markdown/:id', function(request, response) {
-	response.send(501)
-	// repository.getArticleMarkdown(request.params.id, function(err, data){
-	// 	if (data) {
-	//     	response.send(200, data)
-	//     } else {
-	//     	response.send(500, err)
-	//     }
-	// })
-})
-
 app.get('/:id', function(request, response) {
-	response.send(501)
-	// repository.getArticleHtml(request.params.id, function(err, data) {
-	// 	if (data) {
-	//     	response.send(200, markdown.toHTML(data))
-	//     } else {
-	//     	response.send(500, err)
-	//     }
-	// })
+	//response.send(501)
+	repository.getArticle(request.params.id, function(err, data) {
+		if (data && data.tekst) { // So favicon.ico doens't get markdown'ed
+	    	response.send(200, markdown.toHTML(data.tekst))
+	    } else {
+	    	response.send(500, err)
+	    }
+	})
 })
 
 app.post('/', function(request, response) {

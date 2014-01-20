@@ -15,7 +15,7 @@
             <p><input class="form-control" type="text" ng-model="article.id" placeholder="ID"/></p>
             <p><input class="form-control" type="text" ng-model="article.supertitel" placeholder="Supertitle"/></p>
             <p><input class="form-control" type="text" ng-model="article.rubrik" placeholder="Rubrik"/></p>
-            <p><input class="form-control" type="text" ng-model="article.summary" placeholder="Summary"/></p>
+            <p><textarea class="form-control" ng-model="article.summary" rows="3" placeholder="Summary"></textarea></p>
             <p><textarea class="form-control" ng-model="article.tekst" rows="20" placeholder="Br&oslash;dtext"></textarea></p>
             <p><input class="form-control" type="text" ng-model="article.primaryTerm" placeholder="Primary Term"/></p>
             <p><input class="form-control" type="text" ng-model="article.topicPages" placeholder="Topic Pages"/></p>
@@ -24,7 +24,8 @@
         </div>
         <div class="col-md-4">
             <p>
-                <button class="btn btn-primary btn-sm" ng-click="saveArticle(articleid)">Gem</button>
+                <button class="btn btn-primary btn-sm" ng-click="saveArticle()">Gem</button>
+                <button class="btn btn-primary btn-sm" ng-click="clearEditor()">Ny</button>
                 <a class="preview" target="_blank" href="/{{article.id}}">Preview</a>
             </p>
             <p>
@@ -33,9 +34,9 @@
             <h4>Artikler</h4>
             <p>Filter: <input class="form-control input-sm" style="width:50%;height:20px;display:inline-block" type="text" ng-model="query"></p>
             <p ng-repeat="article in articles | filter:query">
-                <button type="button" class="btn btn-info btn-xs" ng-click="getArticle(article['Article ID'].S)">Load</button>
-                <abbr ng-attr-title="{{article.Article.S}}" class="initialism">{{article['Article ID'].S}}</abbr>
-                <span class="glyphicon glyphicon-remove" ng-click="deleteArticle($index, article['Article ID'].S)" style="float:right;" />
+                <button type="button" class="btn btn-info btn-xs" ng-click="getArticle(article.id)">Load</button>
+                <abbr ng-attr-title="{{article.tekst}}" class="initialism">{{article.id}}</abbr>
+                <span class="glyphicon glyphicon-remove" ng-click="deleteArticle($index, article.id)" style="float:right;" />
             </p>
         </div>
     </div>
@@ -60,17 +61,21 @@
             })
         }
 
-        $scope.saveArticle = function(id){
-            console.log($scope.article)
+        $scope.saveArticle = function(){
             if ($scope.article.id)
             {
-                // $http.post("/", $scope.article).success(function(data){
-                //     $scope.articles.pop($scope.article)
-                //     // TODO: Show "OK"
-                // })
-                $http.put("/" + id, $scope.article).success(function(data){
+                $http.put("/" + $scope.article.id, $scope.article).success(function(data){
+                    var a = false
+                    for(var i = 0, bound = $scope.articles.length; i < bound; ++i) {
+                        if ($scope.articles[i].id === $scope.article.id) {
+                            a = true
+                        }
+                    }
+
+                    if (a === false) {
+                        $scope.articles.push($scope.article)
+                    }
                     // TODO: Show "OK"
-                    console.log("Saved")
                 })
             } else {
             }
@@ -79,7 +84,12 @@
         $scope.deleteArticle = function(index, id) {
             $http.delete("/" + id).success(function(data) {
                 $scope.articles.splice(index, 1)
+                $scope.article = {}
             })
+        }
+
+        $scope.clearEditor = function() {
+            $scope.article = {}
         }
     })
 }(jQuery)
