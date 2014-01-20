@@ -55,7 +55,7 @@ module.exports.saveArticle = function(body, callback) {
 module.exports.updateArticle = function(id, body, callback) {
     var params = {
         TableName: "contentdb_poc",
-        Key: { "Article ID" : {"S" : body.id } },
+        Key: { "Article ID" : {"S" : id } },
         AttributeUpdates: {
             "Tekst": {Value: {"S" : body.tekst }},
             "Supertitel": {Value: {"S": body.supertitel}},
