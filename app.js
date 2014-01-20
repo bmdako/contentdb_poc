@@ -12,7 +12,7 @@ app.use("/", express.static("./client"))
 //     response.sendfile('./client/index.html')
 // })
 
-app.get("/articles", function(request, response){
+app.get("/api/article/scan", function(request, response){
 	repository.scanArticles(function(err, data){
 		if (data) {
 	    	response.send(200, data)
@@ -22,7 +22,7 @@ app.get("/articles", function(request, response){
 	})
 })
 
-app.get('/json/:id', function(request, response) {
+app.get('/api/article/json/:id', function(request, response) {
 	repository.getArticle(request.params.id, function(err, data){
 		if (data) {
 	    	response.send(200, data)
@@ -32,7 +32,7 @@ app.get('/json/:id', function(request, response) {
 	})
 })
 
-app.get('/:id', function(request, response) {
+app.get('/api/article/:id', function(request, response) {
 	//response.send(501)
 	repository.getArticle(request.params.id, function(err, data) {
 		if (data && data.tekst) { // So favicon.ico doens't get markdown'ed
@@ -43,7 +43,7 @@ app.get('/:id', function(request, response) {
 	})
 })
 
-app.post('/', function(request, response) {
+app.post('/api/article', function(request, response) {
 	if (request.body) {
 		repository.saveArticle(request.body, function(err, data) {
 			if (data) {
@@ -57,7 +57,7 @@ app.post('/', function(request, response) {
 	}
 })
 
-app.put("/:id", function(request, response) {
+app.put("/api/article/:id", function(request, response) {
 	if (request.body) {
 		repository.updateArticle(request.params.id, request.body, function(err, data){
 			if (data) {
@@ -71,7 +71,7 @@ app.put("/:id", function(request, response) {
 	}
 })
 
-app.delete("/:id", function(request, response){
+app.delete("/api/article/:id", function(request, response){
 	repository.deleteArticle(request.params.id, function(err, data) {
 		if (data) {
 			response.send(200, data)
