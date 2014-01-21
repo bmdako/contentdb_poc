@@ -1,6 +1,14 @@
 var contentdb_poc = angular.module('contentdb_poc', ['ngRoute'])
 
-contentdb_poc.controller('Article', function($scope, $http){
+.config(function($routeProvider) {
+    console.log("ss")
+    console.log($routeProvider)
+     $routeProvider.
+       when("/ghostdown",  {templateUrl:'ghostdown.html',  controller:'ArticleCtrl'})
+       //when("/settings", {templateUrl:'settings.html', controller:SettingsCntl});
+  })
+
+.controller('ArticleCtrl', function($scope, $http){
 
     $scope.article = {}
 
@@ -47,14 +55,6 @@ contentdb_poc.controller('Article', function($scope, $http){
 })
 
 // angular.module('deepLinking', ['ngRoute', 'ngSanitize'])
-// contentdb_poc.config(function($routeProvider) {
-//     console.log("s")
-//     console.log($routeProvider)
-//      $routeProvider.
-//        when("/ghostdown",  {templateUrl:'ghostdown.html',  controller:'Article'})
-//        //when("/settings", {templateUrl:'settings.html', controller:SettingsCntl});
-//   })
-// console.log(contentdb_poc)
 
 // angular.module('deepLinking', ['ngRoute', 'ngSanitize'])
 //   .config(function($routeProvider) {
