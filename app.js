@@ -8,10 +8,6 @@ var markdown = require( "markdown" ).markdown
 
 app.use("/", express.static("./client"))
 
-// app.get('/', function(request, response) {
-//     response.sendfile('./client/index.html')
-// })
-
 app.get("/api/article/scan", function(request, response){
 	repository.scanArticles(function(err, data){
 		if (data) {
@@ -79,6 +75,10 @@ app.delete("/api/article/:id", function(request, response){
 			response.send(500, err)
 		}
 	})
+})
+
+app.get('*', function(request, response) {
+    response.sendfile('./client/index.html')
 })
 
 var port = process.env.PORT || 5000
