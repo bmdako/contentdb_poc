@@ -1,16 +1,17 @@
 var AWS = require('aws-sdk')
 AWS.config.loadFromPath('./config/aws.config')
 var dynamodb = new AWS.DynamoDB()
+var markdown = require( "markdown" ).markdown
 
-module.exports.getArticle = function(id, callback) {
+module.exports.getArticle = function(request, response) {
     var params = {
         TableName: "contentdb_poc",
-        Key : { "Article ID" : {"S" : id }}}
+        Key : { "Article ID" : {"S" : request.params.id }}}
 
     dynamodb.getItem(params, function (err, data) {
         if (data) {
             if (data.Item) {
-                var article = {
+                response.send(200, {
                     id: data.Item["Article ID"].S,
                     tekst: data.Item.Tekst ? data.Item.Tekst.S : "",
                     supertitel: data.Item.Supertitel ? data.Item.Supertitel.S : "",
@@ -20,70 +21,85 @@ module.exports.getArticle = function(id, callback) {
                     topicPages: data.Item.TopicPages ? data.Item.TopicPages.S : "",
                     presentationTags: data.Item.PresentationTags ? data.Item.PresentationTags.S : "",
                     prisAbonnement: data.Item.PrisAbonnement ? data.Item.PrisAbonnement.S : ""
-                }
-                callback(undefined, article)
+                })
             } else {
-                callback(undefined, data)
+                response.send(200, data)
             }
         } else {
-            callback(err, undefined)
+            response.send(500, err)
         }
     })
 }
 
-module.exports.getArticleMarkdown = function(id, callback) {
-    callback("Not implemented", undefined)
+module.exports.getArticleMarkdown = function(request, response) {
+    response.send(501)
+    //markdown.toHTML(data.tekst)
 }
 
-module.exports.getArticleHtml = function(id, callback) {
-    callback("Not implemented", undefined)
+module.exports.getArticleHtml = function(request, response) {
+    response.send(501)
 }
 
-module.exports.saveArticle = function(body, callback) {
-    var id = guid()
+module.exports.saveArticle = function(request, response) {
+    response.send(501)
+    // var id = guid()
+    // var params = {
+    //     TableName: "contentdb_poc",
+    //     Item: {
+    //         "Article ID" : {"S" : id },
+    //         "Article": {"S" : article }}}
+
+    // dynamodb.putItem(params, function (err, data) {
+    //     if (data) {
+    //         response.send(200, data)
+    //     } else {
+    //         response.send(500, err)
+    //     }
+    // })
+}
+
+module.exports.updateArticle = function(request, response) {
+    if (request.body) {
+        var params = {
+            TableName: "contentdb_poc",
+            Key: { "Article ID" : {"S" : request.params.id } },
+            AttributeUpdates: {
+                "Tekst": {Value: {"S" : request.body.tekst }},
+                "Supertitel": {Value: {"S": request.body.supertitel}},
+                "Rubrik": {Value: {"S": request.body.rubrik}},
+                "Summary": {Value: {"S": request.body.summary}},
+                "PrimaryTerm": {Value: {"S": request.body.primaryTerm}},
+                "TopicPages": {Value: {"S": request.body.topicPages}},
+                "PresentationTags": {Value: {"S": request.body.presentationTags}},
+                "PrisAbonnement": {Value: {"S": request.body.prisAbonnement}}}}
+
+        dynamodb.updateItem(params, function (err, data) {
+            if (data) {
+                response.send(200, data)
+            } else {
+                response.send(500, err)
+            }
+        })
+    } else {
+        response.send(400)
+    }
+}
+
+module.exports.deleteArticle = function(request, response) {
     var params = {
         TableName: "contentdb_poc",
-        Item: {
-            "Article ID" : {"S" : id },
-            "Article": {"S" : article }}}
-
-    dynamodb.putItem(params, function (err, data) {
-        callback(err, data)
-    })
-}
-
-module.exports.updateArticle = function(id, body, callback) {
-    var params = {
-        TableName: "contentdb_poc",
-        Key: { "Article ID" : {"S" : id } },
-        AttributeUpdates: {
-            "Tekst": {Value: {"S" : body.tekst }},
-            "Supertitel": {Value: {"S": body.supertitel}},
-            "Rubrik": {Value: {"S": body.rubrik}},
-            "Summary": {Value: {"S": body.summary}},
-            "PrimaryTerm": {Value: {"S": body.primaryTerm}},
-            "TopicPages": {Value: {"S": body.topicPages}},
-            "PresentationTags": {Value: {"S": body.presentationTags}},
-            "PrisAbonnement": {Value: {"S": body.prisAbonnement}}}}
-
-    dynamodb.updateItem(params, function (err, data) {
-        console.log(data)
-        console.log(err)
-        callback(err, data)
-    })
-}
-
-module.exports.deleteArticle = function(id, callback) {
-    var params = {
-        TableName: "contentdb_poc",
-        Key: { "Article ID" : {"S" : id } }}
+        Key: { "Article ID" : {"S" : request.params.id } }}
 
     dynamodb.deleteItem(params, function(err, data){
-        callback(err, data)
+        if (data) {
+            response.send(200, data)
+        } else {
+            response.send(500, err)
+        }
     })
 }
 
-module.exports.scanArticles = function(callback) {
+module.exports.scanArticles = function(request, response) {
     var params = {
         TableName: "contentdb_poc"
     }
@@ -92,7 +108,7 @@ module.exports.scanArticles = function(callback) {
         if (data) {
             var temp = []
             for(var i = 0, bound = data.Count; i < bound; ++i) {
-                var article = {
+                temp.push({
                     id: data.Items[i]["Article ID"].S,
                     tekst: data.Items[i].Tekst ? data.Items[i].Tekst.S : "",
                     supertitel: data.Items[i].Supertitel ? data.Items[i].Supertitel.S : "",
@@ -102,12 +118,11 @@ module.exports.scanArticles = function(callback) {
                     topicPages: data.Items[i].TopicPages ? data.Items[i].TopicPages.S : "",
                     presentationTags: data.Items[i].PresentationTags ? data.Items[i].PresentationTags.S : "",
                     prisAbonnement: data.Items[i].PrisAbonnement ? data.Items[i].PrisAbonnement.S : ""
-                }
-                temp.push(article)
+                })
             }
-            callback(err, temp)
+            response.send(200, data)
         } else {
-            callback(err, data)
+            response.send(500, err)
         }
     })
 }

@@ -2,84 +2,31 @@ var express = require("express")
 var app = express()
 app.use(express.logger())
 app.use(express.bodyParser())
+app.use(express.favicon())
+
+var Bliss = require('bliss')
+var bliss = new Bliss()
 
 var repository = require('./core/repository.js')
-var markdown = require( "markdown" ).markdown
+var site = require('./core/site.js')
 
 app.use("/", express.static("./client"))
 
-app.get("/api/article/scan", function(request, response){
-	repository.scanArticles(function(err, data){
-		if (data) {
-	    	response.send(200, data)
-	    } else {
-	    	response.send(500, err)
-	    }
-	})
+app.get('/test', function(request, response) {
+	response.send(bliss.render(
+		'templates/orders',
+		{name: "test"},
+		[{title: "1"}, {title:"2"}]))
 })
 
-app.get('/api/article/json/:id', function(request, response) {
-	repository.getArticle(request.params.id, function(err, data){
-		if (data) {
-	    	response.send(200, data)
-	    } else {
-	    	response.send(500, err)
-	    }
-	})
-})
+app.get('/:id', site.showArticle)
 
-app.get('/api/article/:id', function(request, response) {
-	//response.send(501)
-	repository.getArticle(request.params.id, function(err, data) {
-		if (data && data.tekst) { // So favicon.ico doens't get markdown'ed
-	    	response.send(200, markdown.toHTML(data.tekst))
-	    } else {
-	    	response.send(500, err)
-	    }
-	})
-})
-
-app.post('/api/article', function(request, response) {
-	if (request.body) {
-		repository.saveArticle(request.body, function(err, data) {
-			if (data) {
-				response.send(200, data)
-			} else {
-				response.send(500, err)
-			}
-		})
-	} else {
-		response.send(400)
-	}
-})
-
-app.put("/api/article/:id", function(request, response) {
-	if (request.body) {
-		repository.updateArticle(request.params.id, request.body, function(err, data){
-			if (data) {
-				response.send(200, data)
-			} else {
-				response.send(500, err)
-			}
-		})
-	} else {
-		response.send(400)
-	}
-})
-
-app.delete("/api/article/:id", function(request, response){
-	repository.deleteArticle(request.params.id, function(err, data) {
-		if (data) {
-			response.send(200, data)
-		} else {
-			response.send(500, err)
-		}
-	})
-})
-
-app.get('*', function(request, response) {
-    response.sendfile('./client/index.html')
-})
+app.get("/api/article/scan", repository.scanArticles)
+app.get('/api/article/json/:id', repository.getArticle)
+app.get('/api/article/:id', repository.getArticleMarkdown)
+app.post('/api/article', repository.saveArticle)
+app.put("/api/article/:id", repository.updateArticle)
+app.delete("/api/article/:id", repository.deleteArticle)
 
 var port = process.env.PORT || 5000
 app.listen(port, function() {

@@ -1,0 +1,12 @@
+@!(customer,orders)
+<h1>Welcome @customer.name!</h1>
+
+<ul>
+@orders
+@orders.forEach(function(order){
+  <li>@order.title</li>
+})
+</ul>
+
+
+@render("orders2")
