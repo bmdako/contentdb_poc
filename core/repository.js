@@ -120,7 +120,7 @@ module.exports.scanArticles = function(request, response) {
                     prisAbonnement: data.Items[i].PrisAbonnement ? data.Items[i].PrisAbonnement.S : ""
                 })
             }
-            response.send(200, data)
+            response.send(200, temp)
         } else {
             response.send(500, err)
         }

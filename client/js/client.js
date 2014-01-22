@@ -1,13 +1,4 @@
-var contentdb_poc = angular.module('contentdb_poc', ['ngRoute'])
-
-.config(function($routeProvider) {
-    console.log("ss")
-    console.log($routeProvider)
-     $routeProvider.
-       when("/ghostdown",  {templateUrl:'ghostdown.html',  controller:'ArticleCtrl'})
-       //when("/settings", {templateUrl:'settings.html', controller:SettingsCntl});
-  })
-
+angular.module('contentdb_poc', [])
 .controller('ArticleCtrl', function($scope, $http){
 
     $scope.article = {}

@@ -4,23 +4,14 @@ app.use(express.logger())
 app.use(express.bodyParser())
 app.use(express.favicon())
 
-var Bliss = require('bliss')
-var bliss = new Bliss()
 
 var repository = require('./core/repository.js')
 var site = require('./core/site.js')
 
 app.use("/", express.static("./client"))
-
-app.get('/test', function(request, response) {
-	response.send(bliss.render(
-		'templates/orders',
-		{name: "test"},
-		[{title: "1"}, {title:"2"}]))
-})
-
+app.get("/", site.showMainPage)
 app.get('/:id', site.showArticle)
-
+app.get('/raw/:id', site.showRawArticle)
 app.get("/api/article/scan", repository.scanArticles)
 app.get('/api/article/json/:id', repository.getArticle)
 app.get('/api/article/:id', repository.getArticleMarkdown)
