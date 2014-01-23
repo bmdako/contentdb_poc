@@ -3,7 +3,7 @@ AWS.config.loadFromPath('./config/aws.config')
 var dynamodb = new AWS.DynamoDB()
 var markdown = require( "markdown" ).markdown
 
-module.exports.getArticle = function(request, response) {
+module.exports.get = function(request, response) {
     var params = {
         TableName: "contentdb_poc",
         Key : { "Article ID" : {"S" : request.params.id }}}
@@ -31,16 +31,16 @@ module.exports.getArticle = function(request, response) {
     })
 }
 
-module.exports.getArticleMarkdown = function(request, response) {
+module.exports.getMarkdown = function(request, response) {
     response.send(501)
     //markdown.toHTML(data.tekst)
 }
 
-module.exports.getArticleHtml = function(request, response) {
+module.exports.getHtml = function(request, response) {
     response.send(501)
 }
 
-module.exports.saveArticle = function(request, response) {
+module.exports.save = function(request, response) {
     response.send(501)
     // var id = guid()
     // var params = {
@@ -58,7 +58,7 @@ module.exports.saveArticle = function(request, response) {
     // })
 }
 
-module.exports.updateArticle = function(request, response) {
+module.exports.update = function(request, response) {
     if (request.body) {
         var params = {
             TableName: "contentdb_poc",
@@ -85,7 +85,7 @@ module.exports.updateArticle = function(request, response) {
     }
 }
 
-module.exports.deleteArticle = function(request, response) {
+module.exports.delete = function(request, response) {
     var params = {
         TableName: "contentdb_poc",
         Key: { "Article ID" : {"S" : request.params.id } }}
@@ -99,7 +99,7 @@ module.exports.deleteArticle = function(request, response) {
     })
 }
 
-module.exports.scanArticles = function(request, response) {
+module.exports.scan = function(request, response) {
     var params = {
         TableName: "contentdb_poc"
     }

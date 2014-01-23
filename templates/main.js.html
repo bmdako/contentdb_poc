@@ -1,8 +1,14 @@
+@!(template, article)
 <!DOCTYPE html>
 <html>
 	@render('head')
 	<body>
-
+		<div class="container">
+			@render('sektionsmenu')
+		</div>
+		<div class="container">
+			@render(template, article)
+		</div>
 		<script src="https://code.jquery.com/jquery.js"></script>
 		<script src="/js/bootstrap.min.js"></script>
 	</body>
