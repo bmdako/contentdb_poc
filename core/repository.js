@@ -32,7 +32,31 @@ module.exports.get = function(request, response) {
 }
 
 module.exports.getMarkdown = function(request, response) {
-    response.send(501)
+    var params = {
+        TableName: "contentdb_poc",
+        Key : { "Article ID" : {"S" : request.params.id }}}
+
+    dynamodb.getItem(params, function (err, data) {
+        if (data) {
+            if (data.Item) {
+                response.send(200, {
+                    id: data.Item["Article ID"].S,
+                    tekst: data.Item.Tekst ? markdown.toHTML(data.Item.Tekst.S) : "<p></p>",
+                    supertitel: data.Item.Supertitel ? data.Item.Supertitel.S : "",
+                    rubrik: data.Item.Rubrik ? data.Item.Rubrik.S : "",
+                    summary: data.Item.Summary ? data.Item.Summary.S : "",
+                    primaryTerm: data.Item.PrimaryTerm ? data.Item.PrimaryTerm.S : "",
+                    topicPages: data.Item.TopicPages ? data.Item.TopicPages.S : "",
+                    presentationTags: data.Item.PresentationTags ? data.Item.PresentationTags.S : "",
+                    prisAbonnement: data.Item.PrisAbonnement ? data.Item.PrisAbonnement.S : ""
+                })
+            } else {
+                response.send(200, data)
+            }
+        } else {
+            response.send(500, err)
+        }
+    })
     //markdown.toHTML(data.tekst)
 }
 
