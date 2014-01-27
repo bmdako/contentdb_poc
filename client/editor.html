@@ -14,14 +14,14 @@
     <div class="row">
         <div class="col-md-8">
             <p><input class="form-control" type="text" ng-model="article.id" placeholder="ID"/></p>
-            <p><input class="form-control" type="text" ng-model="article.supertitel" placeholder="Supertitle"/></p>
-            <p><input class="form-control" type="text" ng-model="article.rubrik" placeholder="Rubrik"/></p>
-            <p><textarea class="form-control" ng-model="article.summary" rows="3" placeholder="Summary"></textarea></p>
-            <p><textarea class="form-control" ng-model="article.tekst" rows="20" placeholder="Br&oslash;dtext"></textarea></p>
-            <p><input class="form-control" type="text" ng-model="article.primaryTerm" placeholder="Primary Term"/></p>
-            <p><input class="form-control" type="text" ng-model="article.topicPages" placeholder="Topic Pages"/></p>
-            <p><input class="form-control" type="text" ng-model="article.presentationTags" placeholder="Pr&aelig;sentations Tags"/></p>
-            <p><input class="form-control" type="text" ng-model="article.prisAbonnement" placeholder="Pris/Abonnement"/></p>
+            <p><input class="form-control" type="text" ng-model="article.Supertitel" placeholder="Supertitle"/></p>
+            <p><input class="form-control" type="text" ng-model="article.Rubrik" placeholder="Rubrik"/></p>
+            <p><textarea class="form-control" ng-model="article.Summary" rows="3" placeholder="Summary"></textarea></p>
+            <p><textarea class="form-control" ng-model="article.Tekst" rows="20" placeholder="Br&oslash;dtext"></textarea></p>
+            <p><input class="form-control" type="text" ng-model="article.PrimaryTerm" placeholder="Primary Term"/></p>
+            <p><input class="form-control" type="text" ng-model="article.TopicPages" placeholder="Topic Pages"/></p>
+            <p><input class="form-control" type="text" ng-model="article.PresentationTags" placeholder="Pr&aelig;sentations Tags"/></p>
+            <p><input class="form-control" type="text" ng-model="article.PrisAbonnement" placeholder="Pris/Abonnement"/></p>
         </div>
         <div class="col-md-4">
             <p>
@@ -36,7 +36,7 @@
             <p>Filter: <input class="form-control input-sm" style="width:50%;height:20px;display:inline-block" type="text" ng-model="query"></p>
             <p ng-repeat="article in articles | filter:query">
                 <button type="button" class="btn btn-info btn-xs" ng-click="getArticle(article.id)">Load</button>
-                <abbr ng-attr-title="{{article.tekst}}" class="initialism">{{article.id}}</abbr>
+                <abbr ng-attr-title="{{article.Tekst}}" class="">{{article.id}}</abbr>
                 <span class="glyphicon glyphicon-remove" ng-click="deleteArticle($index, article.id)" style="float:right;" />
             </p>
         </div>
