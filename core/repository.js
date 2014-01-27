@@ -45,8 +45,6 @@ module.exports.save = function(request, response) {
 }
 
 module.exports.update = function(request, response) {
-    getAttributeUpdates(request.body)
-    response.send(200)
     if (request.body) {
         var params = {
             TableName: "contentdb_poc",
