@@ -11,17 +11,12 @@ module.exports.get = function(request, response) {
     dynamodb.getItem(params, function (err, data) {
         if (data) {
             if (data.Item) {
-                response.send(200, {
-                    id: data.Item["Article ID"].S,
-                    tekst: data.Item.Tekst ? data.Item.Tekst.S : "",
-                    supertitel: data.Item.Supertitel ? data.Item.Supertitel.S : "",
-                    rubrik: data.Item.Rubrik ? data.Item.Rubrik.S : "",
-                    summary: data.Item.Summary ? data.Item.Summary.S : "",
-                    primaryTerm: data.Item.PrimaryTerm ? data.Item.PrimaryTerm.S : "",
-                    topicPages: data.Item.TopicPages ? data.Item.TopicPages.S : "",
-                    presentationTags: data.Item.PresentationTags ? data.Item.PresentationTags.S : "",
-                    prisAbonnement: data.Item.PrisAbonnement ? data.Item.PrisAbonnement.S : ""
-                })
+                var a = flattenAwsItem(data.Item)
+                if (request.query.format === 'markdown')
+                {
+                    a['Tekst'] = markdown.toHTML(a['Tekst'])
+                }
+                response.send(200, a)
             } else {
                 response.send(200, data)
             }
@@ -29,39 +24,6 @@ module.exports.get = function(request, response) {
             response.send(500, err)
         }
     })
-}
-
-module.exports.getMarkdown = function(request, response) {
-    var params = {
-        TableName: "contentdb_poc",
-        Key : { "Article ID" : {"S" : request.params.id }}}
-
-    dynamodb.getItem(params, function (err, data) {
-        if (data) {
-            if (data.Item) {
-                response.send(200, {
-                    id: data.Item["Article ID"].S,
-                    tekst: data.Item.Tekst ? markdown.toHTML(data.Item.Tekst.S) : "<p></p>",
-                    supertitel: data.Item.Supertitel ? data.Item.Supertitel.S : "",
-                    rubrik: data.Item.Rubrik ? data.Item.Rubrik.S : "",
-                    summary: data.Item.Summary ? data.Item.Summary.S : "",
-                    primaryTerm: data.Item.PrimaryTerm ? data.Item.PrimaryTerm.S : "",
-                    topicPages: data.Item.TopicPages ? data.Item.TopicPages.S : "",
-                    presentationTags: data.Item.PresentationTags ? data.Item.PresentationTags.S : "",
-                    prisAbonnement: data.Item.PrisAbonnement ? data.Item.PrisAbonnement.S : ""
-                })
-            } else {
-                response.send(200, data)
-            }
-        } else {
-            response.send(500, err)
-        }
-    })
-    //markdown.toHTML(data.tekst)
-}
-
-module.exports.getHtml = function(request, response) {
-    response.send(501)
 }
 
 module.exports.save = function(request, response) {
@@ -83,19 +45,13 @@ module.exports.save = function(request, response) {
 }
 
 module.exports.update = function(request, response) {
+    getAttributeUpdates(request.body)
+    response.send(200)
     if (request.body) {
         var params = {
             TableName: "contentdb_poc",
             Key: { "Article ID" : {"S" : request.params.id } },
-            AttributeUpdates: {
-                "Tekst": {Value: {"S" : request.body.tekst }},
-                "Supertitel": {Value: {"S": request.body.supertitel}},
-                "Rubrik": {Value: {"S": request.body.rubrik}},
-                "Summary": {Value: {"S": request.body.summary}},
-                "PrimaryTerm": {Value: {"S": request.body.primaryTerm}},
-                "TopicPages": {Value: {"S": request.body.topicPages}},
-                "PresentationTags": {Value: {"S": request.body.presentationTags}},
-                "PrisAbonnement": {Value: {"S": request.body.prisAbonnement}}}}
+            AttributeUpdates: getAttributeUpdates(request.body)}
 
         dynamodb.updateItem(params, function (err, data) {
             if (data) {
@@ -125,30 +81,87 @@ module.exports.delete = function(request, response) {
 
 module.exports.scan = function(request, response) {
     var params = {
-        TableName: "contentdb_poc"
+        TableName: "contentdb_poc",
+        AttributesToGet: ["Article ID", "Rubrik", "Tekst"],
+        ScanFilter: {}
     }
 
     dynamodb.scan(params, function(err, data){
         if (data) {
             var temp = []
             for(var i = 0, bound = data.Count; i < bound; ++i) {
-                temp.push({
-                    id: data.Items[i]["Article ID"].S,
-                    tekst: data.Items[i].Tekst ? data.Items[i].Tekst.S : "",
-                    supertitel: data.Items[i].Supertitel ? data.Items[i].Supertitel.S : "",
-                    rubrik: data.Items[i].Rubrik ? data.Items[i].Rubrik.S : "",
-                    summary: data.Items[i].Summary ? data.Items[i].Summary.S : "",
-                    primaryTerm: data.Items[i].PrimaryTerm ? data.Items[i].PrimaryTerm.S : "",
-                    topicPages: data.Items[i].TopicPages ? data.Items[i].TopicPages.S : "",
-                    presentationTags: data.Items[i].PresentationTags ? data.Items[i].PresentationTags.S : "",
-                    prisAbonnement: data.Items[i].PrisAbonnement ? data.Items[i].PrisAbonnement.S : ""
-                })
+                temp.push(flattenAwsItem(data.Items[i]))
             }
             response.send(200, temp)
         } else {
             response.send(500, err)
         }
     })
+}
+
+function flattenAwsItem(item) {
+    var temp = {}
+    temp.id = item["Article ID"].S // Legacy
+    for(var key in item){
+        if (item.hasOwnProperty(key)) {
+            if (item[key].S) {
+                // S — (String)
+                // A String data type
+                temp[key] = item[key].S
+            } else if (item[key].N) {
+                // N — (String)
+                // A Number data type
+                temp[key] = item[key].N
+            } else if (item[key].B) {
+                // B — (Base64 Encoded String)
+                // A Binary data type
+                temp[key] = item[key].B
+            } else if (item[key].SS) {
+                // SS — (Array<String>)
+                // A String set data type
+                temp[key] = item[key].SS
+            } else if (item[key].NS) {
+                // NS — (Array<String>)
+                // Number set data type
+                temp[key] = item[key].NS
+            } else if (item[key].BS) {
+                // BS — (Array<Base64 Encoded String>)
+                // A Binary set data type
+                temp[key] = item[key].BS
+            }
+        }
+    }
+    return temp
+}
+
+function getAttributeUpdates(item) {
+    var AttributeUpdates = {}
+    for(var key in item){
+        if (item.hasOwnProperty(key) && key !== 'id' && key !== 'Article ID') {
+            AttributeUpdates[key] = { Value: {}}
+            switch(typeof(item[key])) {
+                case 'string':
+                    AttributeUpdates[key].Value.S = item[key]
+                    break
+                case 'number':
+                    AttributeUpdates[key].Value.N = item[key]
+                    break
+                case 'B': // TODO
+                    AttributeUpdates[key].Value.B = item[key]
+                    break
+                case 'SS': // TODO
+                    AttributeUpdates[key].Value.SS = item[key]
+                    break
+                case 'NS': // TODO
+                    AttributeUpdates[key].Value.NS = item[key]
+                    break
+                default:
+                    AttributeUpdates[key].Value.S = item[key]
+                    break
+            }
+        }
+    }
+    return AttributeUpdates
 }
 
 function guid() {

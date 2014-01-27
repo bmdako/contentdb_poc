@@ -9,7 +9,7 @@ module.exports.visForside = function(request, response) {
 }
 
 module.exports.visArtikel = function (request, response) {
-	http.get(serverUrl + "/api/" + request.params.id, function(res) {
+	http.get(serverUrl + "/api/" + request.params.id + '?format=markdown', function(res) {
   		res.setEncoding('utf8');
     	res.on('data', function(article){
         	response.send(bliss.render('templates/main', "artikel", JSON.parse(article)))
@@ -24,7 +24,7 @@ module.exports.visSektion = function(request, response) {
 }
 
 module.exports.visRaaArtikel = function (request, response) {
-	http.get( serverUrl + "/api/json/" + request.params.id, function(res) {
+	http.get( serverUrl + "/api/" + request.params.id, function(res) {
   		res.setEncoding('utf8');
     	res.on('data', function(chunk){
         	response.send(200, chunk)

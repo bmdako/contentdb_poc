@@ -8,7 +8,7 @@ angular.module('contentdb_poc', [])
     })
 
     $scope.getArticle = function(id){
-        $http.get("/api/json/" + id).success(function(data){
+        $http.get("/api/" + id).success(function(data){
             $scope.article = data
         })
     }
