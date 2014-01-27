@@ -8,42 +8,46 @@
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.9/angular.min.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.9/angular-route.min.js"></script>
 </head>
-<body ng-controller="ArticleCtrl">
- <div class="container">
+<body ng-controller="DashboardCtrl">
     <br><br><br><br>
-    <div class="row">
-        <div class="col-md-8">
-            <p><input class="form-control" type="text" ng-model="article.id" placeholder="ID"/></p>
-            <p><input class="form-control" type="text" ng-model="article.Supertitel" placeholder="Supertitle"/></p>
-            <p><input class="form-control" type="text" ng-model="article.Rubrik" placeholder="Rubrik"/></p>
-            <p><textarea class="form-control" ng-model="article.Summary" rows="3" placeholder="Summary"></textarea></p>
-            <p><textarea class="form-control" ng-model="article.Tekst" rows="20" placeholder="Br&oslash;dtext"></textarea></p>
-            <p><input class="form-control" type="text" ng-model="article.PrimaryTerm" placeholder="Primary Term"/></p>
-            <p><input class="form-control" type="text" ng-model="article.TopicPages" placeholder="Topic Pages"/></p>
-            <p><input class="form-control" type="text" ng-model="article.PresentationTags" placeholder="Pr&aelig;sentations Tags"/></p>
-            <p><input class="form-control" type="text" ng-model="article.PrisAbonnement" placeholder="Pris/Abonnement"/></p>
-        </div>
-        <div class="col-md-4">
-            <p>
-                <button class="btn btn-primary btn-sm" ng-click="saveArticle()">Gem</button>
-                <button class="btn btn-primary btn-sm" ng-click="clearEditor()">Ny</button>
-                <a class="preview" target="_blank" href="/artikel/{{article.id}}">Preview</a>
-            </p>
-            <p>
-                <a href="/ghostdown.html">Ghostdown demo</a>
-            </p>
-            <h4>Artikler</h4>
-            <p>Filter: <input class="form-control input-sm" style="width:50%;height:20px;display:inline-block" type="text" ng-model="query"></p>
-            <p ng-repeat="article in articles | filter:query">
-                <button type="button" class="btn btn-info btn-xs" ng-click="getArticle(article.id)">Load</button>
-                <abbr ng-attr-title="{{article.Tekst}}" class="">{{article.id}}</abbr>
-                <span class="glyphicon glyphicon-remove" ng-click="deleteArticle($index, article.id)" style="float:right;" />
-            </p>
+    <div class="container" ng-hide="Editing">
+        <p>
+            <button class="btn btn-primary btn-sm" ng-click="clearEditor()">Ny</button>
+        </p>
+        <h4>Artikler</h4>
+        <p>Filter: <input class="form-control input-sm" style="width:50%;height:20px;display:inline-block" type="text" ng-model="query"></p>
+        <p ng-repeat="article in articles | filter:query">
+            <button type="button" class="btn btn-info btn-xs" ng-click="getArticle(article.id)">Load</button>
+            <abbr ng-attr-title="{{article.Tekst}}" class="">{{article.id}}</abbr>
+        </p>
+        <p>
+            <a href="/ghostdown.html">Ghostdown demo</a>
+        </p>
+    </div>
+     <div class="container" ng-show="Editing">
+        <div class="row">
+            <div class="col-md-12">
+                <p>
+                    <button class="btn btn-primary btn-sm" ng-click="clearEditor()">Ny</button>
+                    <button class="aa btn btn-success btn-sm" ng-click="saveArticle()">Gem</button>
+                    <button class="btn btn-danger btn-sm" ng-click="deleteArticle()">Slet</button>
+                    <a class="preview" target="_blank" href="/artikel/{{article.id}}">Preview</a>
+                    <button class="btn btn-default btn-sm" ng-click="closeEditor()" style="float:right;">Luk</button>
+                </p>
+                <p><input class="form-control" type="text" ng-model="article.id" placeholder="ID"/></p>
+                <p><input class="form-control" type="text" ng-model="article.Supertitel" placeholder="Supertitle"/></p>
+                <p><input class="form-control" type="text" ng-model="article.Rubrik" placeholder="Rubrik"/></p>
+                <p><textarea class="form-control" ng-model="article.Summary" rows="3" placeholder="Summary"></textarea></p>
+                <p><textarea class="form-control" ng-model="article.Tekst" rows="20" placeholder="Br&oslash;dtext"></textarea></p>
+                <p><input class="form-control" type="text" ng-model="article.PrimaryTerm" placeholder="Primary Term"/></p>
+                <p><input class="form-control" type="text" ng-model="article.TopicPages" placeholder="Topic Pages"/></p>
+                <p><input class="form-control" type="text" ng-model="article.PresentationTags" placeholder="Pr&aelig;sentations Tags"/></p>
+                <p><input class="form-control" type="text" ng-model="article.PrisAbonnement" placeholder="Pris/Abonnement"/></p>
+            </div>
         </div>
     </div>
-</div>
-<script src="/js/client.js"></script>
-<script src="https://code.jquery.com/jquery.js"></script>
-<script src="/js/bootstrap.min.js"></script>
+    <script src="/js/client.js"></script>
+    <script src="https://code.jquery.com/jquery.js"></script>
+    <script src="/js/bootstrap.min.js"></script>
 </body>
 </html>

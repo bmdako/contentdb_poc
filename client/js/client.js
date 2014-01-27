@@ -1,45 +1,60 @@
 angular.module('contentdb_poc', [])
-.controller('ArticleCtrl', function($scope, $http){
+
+.controller('DashboardCtrl', function($scope, $http){
 
     $scope.article = {}
+    $scope.Editing = false
 
-    $http.get("/api/scan").success(function(data){
-        $scope.articles = data
-    })
+    function scan() {
+        $http.get("/api/scan").success(function(data){
+            $scope.articles = data
+        })
+    }
+    scan()
 
     $scope.getArticle = function(id){
         $http.get("/api/" + id).success(function(data){
             $scope.article = data
+            $scope.Editing = true
         })
     }
 
     $scope.saveArticle = function(){
         if ($scope.article.id) {
             $http.put("/api/" + $scope.article.id, $scope.article).success(function(data) {
-                console.log("da")
-                var a = false
+                var newArticle = true
                 for(var i = 0, bound = $scope.articles.length; i < bound; ++i) {
                     if ($scope.articles[i].id === $scope.article.id) {
-                        a = true
+                        newArticle = false
                     }
                 }
 
-                if (a === false) {
+                if (newArticle) {
                     $scope.articles.push($scope.article)
                 }
+
+                $scope.getArticle($scope.article.id)
                 // TODO: Show "OK"
             })
         }
     }
 
-    $scope.deleteArticle = function(index, id) {
-        $http.delete("/api/" + id).success(function(data) {
-            $scope.articles.splice(index, 1)
-            $scope.article = {}
-        })
-    }
-
     $scope.clearEditor = function() {
         $scope.article = {}
+        $scope.Editing = true
+    }
+    
+    $scope.deleteArticle = function() {
+        if ($scope.article.id) {
+            $http.delete("/api/" + $scope.article.id).success(function(data) {
+                $scope.article = {}
+            })
+        }
+    }
+
+    $scope.closeEditor = function() {
+        scan()
+        $scope.article = {}
+        $scope.Editing = false
     }
 })

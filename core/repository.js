@@ -11,7 +11,7 @@ module.exports.get = function(request, response) {
     dynamodb.getItem(params, function (err, data) {
         if (data) {
             if (data.Item) {
-                var a = flattenAwsItem(data.Item)
+                var a = flattenAwsData(data)
                 if (request.query.format === 'markdown')
                 {
                     a['Tekst'] = markdown.toHTML(a['Tekst'])
@@ -86,20 +86,58 @@ module.exports.scan = function(request, response) {
 
     dynamodb.scan(params, function(err, data){
         if (data) {
-            var temp = []
-            for(var i = 0, bound = data.Count; i < bound; ++i) {
-                temp.push(flattenAwsItem(data.Items[i]))
-            }
-            response.send(200, temp)
+            response.send(200, flattenAwsData(data))
         } else {
             response.send(500, err)
         }
     })
 }
 
+module.exports.query = function(request, response) {
+    var params = {
+        TableName: "contentdb_poc",
+        AttributesToGet: ["Article ID", "Rubrik", "Tekst"],
+        //IndexName: "Article ID",
+        KeyConditions: {
+            'Article ID': {
+                AttributeValueList: '',
+                ComparisonOperator: 'Russiske'
+            }
+        }
+    }
+
+    dynamodb.query(params, function(err, data){
+        if (data) {
+            response.send(200, flattenAwsData(data))
+        } else {
+            response.send(500, err)
+        }
+    })
+}
+
+function flattenAwsData(data) {
+    if (data.Count && data.Items) {
+        return flattenAwsItems(data.Items)
+    } else if (data.Item) {
+        return flattenAwsItem(data.Item)
+    } else {
+        return {}
+    }
+}
+
+function flattenAwsItems(items) {
+    var temp = []
+
+    for(var i = 0, bound = items.length; i < bound; ++i) {
+        temp.push(flattenAwsItem(items[i]))
+    }
+
+    return temp
+}
+
 function flattenAwsItem(item) {
-    var temp = {}
-    temp.id = item["Article ID"].S // Legacy
+    var temp = { id: item["Article ID"].S}
+    
     for(var key in item){
         if (item.hasOwnProperty(key)) {
             if (item[key].S) {
@@ -129,36 +167,45 @@ function flattenAwsItem(item) {
             }
         }
     }
+
     return temp
 }
 
-function getAttributeUpdates(item) {
+function getAttributeUpdates(body) {
     var AttributeUpdates = {}
-    for(var key in item){
-        if (item.hasOwnProperty(key) && key !== 'id' && key !== 'Article ID') {
-            AttributeUpdates[key] = { Value: {}}
-            switch(typeof(item[key])) {
+    
+    for(var key in body){
+        if (body.hasOwnProperty(key) && key !== 'id' && key !== 'Article ID') {
+            
+            AttributeUpdates[key] = {}
+            
+            switch(typeof(body[key])) {
                 case 'string':
-                    AttributeUpdates[key].Value.S = item[key]
+                    if (body[key] === '') {
+                        AttributeUpdates[key].Action = 'DELETE'
+                    } else {
+                        AttributeUpdates[key].Value = {S: body[key]}
+                    }
                     break
                 case 'number':
-                    AttributeUpdates[key].Value.N = item[key]
+                    AttributeUpdates[key].Value = {N: body[key]}
                     break
                 case 'B': // TODO
-                    AttributeUpdates[key].Value.B = item[key]
+                    AttributeUpdates[key].Value = {B: body[key]}
                     break
                 case 'SS': // TODO
-                    AttributeUpdates[key].Value.SS = item[key]
+                    AttributeUpdates[key].Value = {SS: body[key]}
                     break
                 case 'NS': // TODO
-                    AttributeUpdates[key].Value.NS = item[key]
+                    AttributeUpdates[key].Value = {NS: body[key]}
                     break
                 default:
-                    AttributeUpdates[key].Value.S = item[key]
+                    AttributeUpdates[key].Value = {S: body[key]}
                     break
             }
         }
     }
+
     return AttributeUpdates
 }
 
