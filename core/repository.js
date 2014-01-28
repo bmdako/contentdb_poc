@@ -115,6 +115,30 @@ module.exports.query = function(request, response) {
     })
 }
 
+module.exports.diff = function(request, response) {
+    var ansidiff = require('ansidiff')
+    getItem(request.params.id, function(err, data) {
+        var original = flattenAwsData(data)
+        var output = {}
+        for(key in request.body) {
+            if (original.hasOwnProperty(key)) {
+                output[key] = ansidiff.words(original[key], request.body[key], diffColorer)
+            }
+        }
+        response.send(200, output)
+    })
+}
+
+function getItem(id, callback) {
+    var params = {
+        TableName: "contentdb_poc",
+        Key : { "Article ID" : {"S" : id }}}
+
+    dynamodb.getItem(params, function (err, data) {
+        callback(err, data)
+    })
+}
+
 function flattenAwsData(data) {
     if (data.Count && data.Items) {
         return flattenAwsItems(data.Items)
@@ -215,4 +239,14 @@ function guid() {
         return v.toString(16)
     })
     return uuid
+}
+
+function diffColorer(obj) {
+    if (obj.added) {
+        return '<span class="added">' + obj.value + '</span>'
+    } else if (obj.removed) {
+        return '<span class="removed">' + obj.value + '</span>'
+    } else {
+        return obj.value
+    }
 }

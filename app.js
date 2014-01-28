@@ -21,6 +21,7 @@ app.get("/api/scan", repository.scan)
 app.get("/api/query", repository.query)
 app.get('/api/:id', repository.get)
 app.post('/api', repository.save)
+app.put("/api/diff/:id", repository.diff)
 app.put("/api/:id", repository.update)
 app.delete("/api/:id", repository.delete)
 
