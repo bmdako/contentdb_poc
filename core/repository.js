@@ -2,6 +2,7 @@ var AWS = require('aws-sdk')
 AWS.config.loadFromPath('./config/aws.config')
 var dynamodb = new AWS.DynamoDB()
 var markdown = require( "markdown" ).markdown
+var ansidiff = require('ansidiff')
 
 module.exports.get = function(request, response) {
     var params = {
@@ -116,13 +117,33 @@ module.exports.query = function(request, response) {
 }
 
 module.exports.diff = function(request, response) {
-    var ansidiff = require('ansidiff')
     getItem(request.params.id, function(err, data) {
         var original = flattenAwsData(data)
         var output = {}
-        for(key in request.body) {
+
+        // Doing a diff for all attributes in the new document
+        for (key in request.body) {
             if (original.hasOwnProperty(key)) {
-                output[key] = ansidiff.words(original[key], request.body[key], diffColorer)
+                output[key] = ansidiff.words(
+                    markdown.toHTML(original[key]),
+                    markdown.toHTML(request.body[key]),
+                    htmlDiffColorer)
+            } else {
+                // If the attributed is completely new, the diff is being made using an empty string as the original
+                output[key] = ansidiff.words(
+                    "",
+                    markdown.toHTML(request.body[key]),
+                    htmlDiffColorer)
+            }
+        }
+
+        // Adding the attributes from the original that have been completely removed from the new document
+        for (key in original) {
+            if (request.body[key] === undefined) {
+                output[key] = ansidiff.words(
+                    markdown.toHTML(original[key]),
+                    "",
+                    htmlDiffColorer)
             }
         }
         response.send(200, output)
@@ -241,11 +262,21 @@ function guid() {
     return uuid
 }
 
-function diffColorer(obj) {
+function htmlDiffColorer(obj) {
     if (obj.added) {
         return '<span class="added">' + obj.value + '</span>'
     } else if (obj.removed) {
         return '<span class="removed">' + obj.value + '</span>'
+    } else {
+        return obj.value
+    }
+}
+
+function markdownDiffColorer(obj) {
+    if (obj.added) {
+        return '**' + obj.value + '**'
+    } else if (obj.removed) {
+        return '**' + obj.value + '**'
     } else {
         return obj.value
     }

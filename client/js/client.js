@@ -1,4 +1,4 @@
-angular.module('contentdb_poc', [])
+angular.module('contentdb_poc', ['ngSanitize'])
 
 .controller('DashboardCtrl', function($scope, $http){
 
@@ -56,5 +56,15 @@ angular.module('contentdb_poc', [])
         scan()
         $scope.article = {}
         $scope.Editing = false
+    }
+
+    $scope.showDiff = function() {
+        if ($scope.article.id) {
+            $http.put("/api/diff/" + $scope.article.id, $scope.article).success(function(data) {
+                console.log(data)
+                $scope.Diff = true
+                $scope.diffdata = data
+            })
+        }
     }
 })
