@@ -1,0 +1,29 @@
+ <div class="container">
+    <div class="row">
+        <div class="col-md-12">
+            <p>
+                <button class="btn btn-primary btn-sm" ng-click="clearEditor()">Ny</button>
+                <button class="aa btn btn-success btn-sm" ng-click="saveArticle()">Gem</button>
+                <button class="aa btn btn-success btn-sm" ng-click="showDiff()">Diff</button>
+                <button class="btn btn-danger btn-sm" ng-click="deleteArticle()">Slet</button>
+                <a class="preview" target="_blank" href="/artikel/{{article.id}}">Preview</a>
+                <button class="btn btn-default btn-sm" ng-click="closeEditor()" style="float:right;">Luk</button>
+            </p>
+            <p><input class="form-control" type="text" ng-model="article.id" placeholder="ID"/></p>
+            <p><input class="form-control" type="text" ng-model="article.Supertitel" placeholder="Supertitle"/></p>
+            <p><input class="form-control" type="text" ng-model="article.Rubrik" placeholder="Rubrik"/></p>
+            <p><textarea class="form-control" ng-model="article.Summary" rows="3" placeholder="Summary"></textarea></p>
+            <p><textarea class="form-control" ng-model="article.Tekst" rows="20" placeholder="Br&oslash;dtext"></textarea></p>
+            <p><input class="form-control" type="text" ng-model="article.PrimaryTerm" placeholder="Primary Term"/></p>
+            <p><input class="form-control" type="text" ng-model="article.TopicPages" placeholder="Topic Pages"/></p>
+            <p><input class="form-control" type="text" ng-model="article.PresentationTags" placeholder="Pr&aelig;sentations Tags"/></p>
+            <p><input class="form-control" type="text" ng-model="article.PrisAbonnement" placeholder="Pris/Abonnement"/></p>
+        </div>
+    </div>
+    <div class="row" ng-show="showDiffSection">
+        <div class="col-md-12">
+            <h3>Diff</h3>
+            <p ng-repeat="elem in diffdata" ng-bind-html="elem"></p>
+        </div>
+    </div>
+</div>

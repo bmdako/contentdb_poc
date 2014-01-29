@@ -1,0 +1,15 @@
+#editor_partials_view
+{
+	margin-top: 80px;
+}
+
+span.added
+{
+	background-color: lightgreen;
+}
+
+span.removed
+{
+	/*text-decoration: line-through;*/
+	background-color: red;
+}

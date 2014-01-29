@@ -9,11 +9,11 @@ app.use("/", express.static("./client"))
 var repository = require('./core/repository.js')
 var site = require('./core/site.js')
 
+app.get("/", site.visForside)
 app.get("/editor", function(request, response){
 	response.sendfile("./client/editor.html")
 })
 
-app.get("/", site.visForside)
 app.get('/:id', site.visArtikel)
 app.get('/artikel/:id', site.visArtikel)
 app.get('/sektion/*', site.visSektion)

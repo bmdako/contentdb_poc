@@ -1,22 +1,49 @@
-angular.module('contentdb_poc', ['ngSanitize'])
+angular.module('contentdb_poc', ['ngRoute', 'ngSanitize'])
 
-.controller('DashboardCtrl', function($scope, $http){
+.config(function($routeProvider, $locationProvider) {
 
-    $scope.article = {}
-    $scope.Editing = false
+  $routeProvider.when('/', {
+    templateUrl: 'editor_partials/dashboard.html',
+    controller: DashboardCtrl
+  })
 
-    function scan() {
-        $http.get("/api/scan").success(function(data){
-            $scope.articles = data
-        })
+    $routeProvider.when('/edit/', {
+    templateUrl: 'editor_partials/edit.html',
+    controller: ArticleCtrl
+  })
+
+  $routeProvider.when('/edit/:articleId', {
+    templateUrl: 'editor_partials/edit.html',
+    controller: ArticleCtrl
+  })
+  
+})
+
+function DashboardCtrl($scope, $http, $location){
+
+    $http.get("/api/scan").success(function(data){
+        $scope.articles = data
+    })
+
+    $scope.openEditor = function(id) {
+
+        var editUrl = '/edit'
+        if (id !== undefined)
+        {
+            editUrl += '/' + id
+        }
+        $location.path(editUrl)
     }
-    scan()
+}
 
-    $scope.getArticle = function(id){
-        $http.get("/api/" + id).success(function(data){
+function ArticleCtrl($scope, $http, $routeParams, $location){
+
+    if ($routeParams.articleId) {
+        $http.get("/api/" + $routeParams.articleId).success(function(data){
             $scope.article = data
-            $scope.Editing = true
         })
+    } else {
+        $scope.article = {}
     }
 
     $scope.saveArticle = function(){
@@ -33,7 +60,6 @@ angular.module('contentdb_poc', ['ngSanitize'])
                     $scope.articles.push($scope.article)
                 }
 
-                $scope.getArticle($scope.article.id)
                 // TODO: Show "OK"
             })
         }
@@ -41,7 +67,6 @@ angular.module('contentdb_poc', ['ngSanitize'])
 
     $scope.clearEditor = function() {
         $scope.article = {}
-        $scope.Editing = true
     }
     
     $scope.deleteArticle = function() {
@@ -53,18 +78,16 @@ angular.module('contentdb_poc', ['ngSanitize'])
     }
 
     $scope.closeEditor = function() {
-        scan()
-        $scope.article = {}
-        $scope.Editing = false
+        $location.path('/')
     }
 
     $scope.showDiff = function() {
+        $scope.showDiffSection = true
         if ($scope.article.id) {
             $http.put("/api/diff/" + $scope.article.id, $scope.article).success(function(data) {
-                console.log(data)
                 $scope.Diff = true
                 $scope.diffdata = data
             })
         }
     }
-})
+}

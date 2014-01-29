@@ -1,0 +1,18 @@
+<div class="container">
+    <div class="row">
+        <div class="col-md-12">
+            <p>
+                <button class="btn btn-primary btn-sm" ng-click="openEditor()">Ny</button>
+            </p>
+            <h4>Artikler</h4>
+            <p>Filter: <input class="form-control input-sm" style="width:50%;height:20px;display:inline-block" type="text" ng-model="query"></p>
+            <p ng-repeat="article in articles | filter:query">
+                <button type="button" class="btn btn-info btn-xs" ng-click="openEditor(article.id)">Load</button>
+                <abbr ng-attr-title="{{article.Tekst}}" class="">{{article.id}}</abbr>
+            </p>
+            <p>
+                <a href="/ghostdown.html">Ghostdown demo</a>
+            </p>
+        </div>
+    </div>
+</div>
