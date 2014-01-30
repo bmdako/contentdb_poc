@@ -1,5 +1,5 @@
 var AWS = require('aws-sdk')
-AWS.config.loadFromPath('./config/aws.config')
+AWS.config.update({region: 'eu-west-1'})
 var dynamodb = new AWS.DynamoDB()
 var markdown = require( "markdown" ).markdown
 var ansidiff = require('ansidiff')
