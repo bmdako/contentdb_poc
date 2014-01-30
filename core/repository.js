@@ -3,21 +3,22 @@ AWS.config.loadFromPath('./config/aws.config')
 var dynamodb = new AWS.DynamoDB()
 var markdown = require( "markdown" ).markdown
 var ansidiff = require('ansidiff')
+var dynamoDbTableName = 'contentdb_poc'
 
 module.exports.get = function(request, response) {
     var params = {
-        TableName: "contentdb_poc",
+        TableName: dynamoDbTableName,
         Key : { "Article ID" : {"S" : request.params.id }}}
 
     dynamodb.getItem(params, function (err, data) {
         if (data) {
             if (data.Item) {
-                var a = flattenAwsData(data)
-                if (request.query.format === 'markdown')
+                var article = flattenAwsData(data)
+                if (request.query.format === 'html')
                 {
-                    a['Tekst'] = markdown.toHTML(a['Tekst'])
+                    article['Tekst'] = markdown.toHTML(article['Tekst'])
                 }
-                response.send(200, a)
+                response.send(200, article)
             } else {
                 response.send(200, data)
             }
@@ -31,7 +32,7 @@ module.exports.save = function(request, response) {
     response.send(501)
     // var id = guid()
     // var params = {
-    //     TableName: "contentdb_poc",
+    //     TableName: dynamoDbTableName,
     //     Item: {
     //         "Article ID" : {"S" : id },
     //         "Article": {"S" : article }}}
@@ -48,7 +49,7 @@ module.exports.save = function(request, response) {
 module.exports.update = function(request, response) {
     if (request.body) {
         var params = {
-            TableName: "contentdb_poc",
+            TableName: dynamoDbTableName,
             Key: { "Article ID" : {"S" : request.params.id } },
             AttributeUpdates: getAttributeUpdates(request.body)}
 
@@ -66,7 +67,7 @@ module.exports.update = function(request, response) {
 
 module.exports.delete = function(request, response) {
     var params = {
-        TableName: "contentdb_poc",
+        TableName: dynamoDbTableName,
         Key: { "Article ID" : {"S" : request.params.id } }}
 
     dynamodb.deleteItem(params, function(err, data){
@@ -80,7 +81,7 @@ module.exports.delete = function(request, response) {
 
 module.exports.scan = function(request, response) {
     var params = {
-        TableName: "contentdb_poc",
+        TableName: dynamoDbTableName,
         AttributesToGet: ["Article ID", "Rubrik", "Tekst"],
         ScanFilter: {}
     }
@@ -96,7 +97,7 @@ module.exports.scan = function(request, response) {
 
 module.exports.query = function(request, response) {
     var params = {
-        TableName: "contentdb_poc",
+        TableName: dynamoDbTableName,
         AttributesToGet: ["Article ID", "Rubrik", "Tekst"],
         //IndexName: "Article ID",
         KeyConditions: {
@@ -152,7 +153,7 @@ module.exports.diff = function(request, response) {
 
 function getItem(id, callback) {
     var params = {
-        TableName: "contentdb_poc",
+        TableName: dynamoDbTableName,
         Key : { "Article ID" : {"S" : id }}}
 
     dynamodb.getItem(params, function (err, data) {
