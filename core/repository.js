@@ -4,6 +4,7 @@ var dynamodb = new AWS.DynamoDB()
 var markdown = require( "markdown" ).markdown
 var ansidiff = require('ansidiff')
 var dynamoDbTableName = process.env.DYNAMODB_TABLE_NAME
+var helper = require("./helper.js")
 
 module.exports.get = function(request, response) {
     var params = {
@@ -28,13 +29,67 @@ module.exports.get = function(request, response) {
     })
 }
 
+// http://edit.berlingskemedia.net/admin/content/nodequeue
+// http://www.b.dk/mecommobile/nodequeue/5
+// http://www.b.dk/mecommobile/node/28194018
+// http://common.berlingskemedia.net/node/28194018/netsprint?token=fiR5MKxMjHJM3F6kHCBM
+var b_dk_mestlaeste = 5
+var bt_dk_senestenyt = 86
+var b_dk_senestenyt = 87
+
+module.exports.getNodeFromBond = function(request, response) {
+
+}
+
+module.exports.getNodeQueueFromBond = function(request, response) {
+
+    helper.getJson("http://www.b.dk/mecommobile/nodequeue/" + request.params.id, function(data) {
+        
+        console.log("SS")
+
+        if (data.items !== undefined) {
+
+            var nodequeue = {
+                category: data.category,
+                items: []
+            }
+
+            for(var i = 0, bound = data.items.length; i < bound; ++i) {
+                nodequeue.items[i] = node = {
+                    nodeid: data.items[i]['0'].value,
+                    title: data.items[i].title,
+                    link: data.items[i].link,
+                    pubDate: data.items[i].pubDate,
+                    updated: data.items[i].updated,
+                    category: data.items[i].category,
+                    author: data.items[i].author,
+                    content_type: data.items[i].content_type,
+                    image: (data.items[i]['1']) ? data.items[i]['1'].attributes : undefined
+                }
+
+                for(var j = 0, bound = data.item[i].related.length; j < bound; ++j) {
+                    node.related = {
+                        nodeid: data.items[i].related[j]['0'].value
+                    }
+                }
+            }
+
+            response.send(nodequeue)
+
+        } else {
+            response.send({'message': 'nothing found'})
+        }
+
+    })
+}
+
 module.exports.save = function(request, response) {
     response.send(501)
     // var id = guid()
     // var params = {
     //     TableName: dynamoDbTableName,
     //     Item: {
-    //         "Article ID" : {"S" : id },
+    //         "Article ID" : {"S" : id }, 
     //         "Article": {"S" : article }}}
 
     // dynamodb.putItem(params, function (err, data) {

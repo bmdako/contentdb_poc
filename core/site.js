@@ -16,7 +16,7 @@ module.exports.visArtikel = function (request, response) {
     	})
 	}).on('error', function(e) {
   		response.send(404, e.message)
-	})	
+	})
 }
 
 module.exports.visSektion = function(request, response) {
