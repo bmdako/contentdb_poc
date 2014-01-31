@@ -3,20 +3,19 @@
   "version": "0.0.1",
   "description": "ContentDB POC",
   "author": "Daniel Kokott",
-  
   "main": "app.js",
   "scripts": {
-  	"start": "node app",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": ". ./config.sh && node app",
+    "dev": ". ./config.sh && supervisor app"
   },
   "dependencies": {
-        "express": "3.3.4",
-        "markdown": "*",
-        "ansidiff": "*",
-        "aws-sdk": "*",
-        "bliss": "*"
-    },
-    "repository": {
+    "express": "3.3.4",
+    "markdown": "*",
+    "ansidiff": "*",
+    "aws-sdk": "*",
+    "bliss": "*"
+  },
+  "repository": {
     "type": "git",
     "url": "https://github.com/bmdako/contentdb_poc"
   }

@@ -9,10 +9,11 @@ Setup:
 
 	Run 'npm install'
 
-	Copy config-folder
+	Copy the config-shell script
+	Or set environment variables AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY manually
 
 Run:
 
-	Run 'npm start' (or 'node app.js')
+	Run 'npm start', 'npm run dev' or 'node app.js'
 
 	Browse http://localhost:5000

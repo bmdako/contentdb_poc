@@ -3,7 +3,7 @@ AWS.config.update({region: 'eu-west-1'})
 var dynamodb = new AWS.DynamoDB()
 var markdown = require( "markdown" ).markdown
 var ansidiff = require('ansidiff')
-var dynamoDbTableName = 'contentdb_poc'
+var dynamoDbTableName = process.env.DYNAMODB_TABLE_NAME
 
 module.exports.get = function(request, response) {
     var params = {

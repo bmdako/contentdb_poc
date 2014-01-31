@@ -5,7 +5,6 @@ app.use(express.bodyParser())
 app.use(express.favicon())
 app.use("/", express.static("./client"))
 
-
 var repository = require('./core/repository.js')
 var site = require('./core/site.js')
 
