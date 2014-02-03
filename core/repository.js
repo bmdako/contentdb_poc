@@ -29,65 +29,85 @@ module.exports.get = function(request, response) {
     })
 }
 
-// http://edit.berlingskemedia.net/admin/content/nodequeue
-// http://www.b.dk/mecommobile/nodequeue/5
-// http://www.b.dk/mecommobile/node/28194018
-// http://common.berlingskemedia.net/node/28194018/netsprint?token=fiR5MKxMjHJM3F6kHCBM
-var b_dk_mestlaeste = 5
-var bt_dk_senestenyt = 86
-var b_dk_senestenyt = 87
-
 module.exports.getNodeFromBond = function(request, response) {
+    helper.getJson("http://www.b.dk/mecommobile/node/" + request.params.id, function(data) {
 
+        if (data.items === undefined || data.items.length === 0) {
+            response.send(404, {'message': 'nothing found'})
+        
+        } else if (data.items.length > 1) {
+            response.send(500, {'message': 'too many nodes found'})
+
+        } else {
+
+            var node = {
+                nodeid: data.items[0]['0'].value,
+                title: data.items[0].title,
+                description: data.items[0].description,
+                link: data.items[0].link,
+                pubDate: data.items[0].pubDate,
+                updated: data.items[0].updated,
+                category: data.items[0].category,
+                content_type: data.items[0].content_type,
+                author: data.items[0].author,
+                email: data.items[0].email,
+                image: (data.items[0]['1']) ? data.items[0]['1'].attributes : undefined,
+                content: data.items[0]['berlingske:content'],
+                pTags: [],
+                related: []
+            }
+
+            if (data.items[0].fields) {
+                for(var k = 0, bound = data.items[0].fields.length; k < bound; ++k) {
+                    switch(data.items[0].fields[k].attributes.keys) {
+                        case 'p_tag':
+                            node.pTags.push(data.items[0].fields[k].value)
+                            break;
+                    }
+                }
+            }            
+
+            if (data.items[0].related) {
+                for(var j = 0, bound = data.items[0].related.length; j < bound; ++j) {
+                    node.related.push({
+                        nodeid: data.items[0].related[j].value['0'].value,
+                        title: data.items[0].related[j].value.title,
+                        link: data.items[0].related[j].value.link,
+                        category: data.items[0].related[j].value.category
+                    })
+                }
+            }
+
+            response.send(200,node)
+        }
+    })
 }
 
 module.exports.getNodeQueueFromBond = function(request, response) {
-
     helper.getJson("http://www.b.dk/mecommobile/nodequeue/" + request.params.id, function(data) {
         
-        console.log("SS")
-
-        if (data.items !== undefined) {
-
-            var nodequeue = {
-                category: data.category,
-                items: []
-            }
-
+        if (data.items === undefined) {
+            response.send({'message': 'nothing found'})
+        
+        } else {
+            var nodequeue = []
             for(var i = 0, bound = data.items.length; i < bound; ++i) {
-                nodequeue.items[i] = node = {
+                nodequeue.push({
                     nodeid: data.items[i]['0'].value,
                     title: data.items[i].title,
                     link: data.items[i].link,
                     pubDate: data.items[i].pubDate,
-                    updated: data.items[i].updated,
+                    //updated: data.items[i].updated,
                     category: data.items[i].category,
-                    author: data.items[i].author,
                     content_type: data.items[i].content_type,
+                    author: data.items[i].author,
+                    email: data.items[i].email,
                     image: (data.items[i]['1']) ? data.items[i]['1'].attributes : undefined
-                }
-
-                if (data.items[i].related) {
-
-                    node.related = []
-
-                    for(var j = 0, bound = data.items[i].related.length; j < bound; ++j) {
-                        node.related.push({
-                            nodeid: data.items[i].related[j].value['0'].value,
-                            title: data.items[i].related[j].value.title,
-                            link: data.items[i].related[j].value.link,
-                            category: data.items[i].related[j].value.category
-                        })
-                    }
-                }
+                })
             }
 
             response.send(nodequeue)
-
-        } else {
-            response.send({'message': 'nothing found'})
         }
-
     })
 }
 
