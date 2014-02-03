@@ -1,15 +1,15 @@
 var AWS = require('aws-sdk')
 AWS.config.update({region: 'eu-west-1'})
 var dynamodb = new AWS.DynamoDB()
-var markdown = require( "markdown" ).markdown
+var markdown = require( 'markdown' ).markdown
 var ansidiff = require('ansidiff')
 var dynamoDbTableName = process.env.DYNAMODB_TABLE_NAME
-var helper = require("./helper.js")
+var helper = require('./helper.js')
 
 module.exports.get = function(request, response) {
     var params = {
         TableName: dynamoDbTableName,
-        Key : { "Article ID" : {"S" : request.params.id }}}
+        Key : { 'Article ID' : {'S' : request.params.id }}}
 
     dynamodb.getItem(params, function (err, data) {
         if (data) {
@@ -30,7 +30,7 @@ module.exports.get = function(request, response) {
 }
 
 module.exports.getNodeFromBond = function(request, response) {
-    helper.getJson("http://www.b.dk/mecommobile/node/" + request.params.id, function(data) {
+    helper.getJson('http://www.b.dk/mecommobile/node/' + request.params.id, function(data) {
 
         if (data.items === undefined || data.items.length === 0) {
             response.send(404, {'message': 'nothing found'})
@@ -84,7 +84,7 @@ module.exports.getNodeFromBond = function(request, response) {
 }
 
 module.exports.getNodeQueueFromBond = function(request, response) {
-    helper.getJson("http://www.b.dk/mecommobile/nodequeue/" + request.params.id, function(data) {
+    helper.getJson('http://www.b.dk/mecommobile/nodequeue/' + request.params.id, function(data) {
         
         if (data.items === undefined) {
             response.send({'message': 'nothing found'})
@@ -117,8 +117,8 @@ module.exports.save = function(request, response) {
     // var params = {
     //     TableName: dynamoDbTableName,
     //     Item: {
-    //         "Article ID" : {"S" : id }, 
-    //         "Article": {"S" : article }}}
+    //         'Article ID' : {'S' : id }, 
+    //         'Article': {'S' : article }}}
 
     // dynamodb.putItem(params, function (err, data) {
     //     if (data) {
@@ -133,7 +133,7 @@ module.exports.update = function(request, response) {
     if (request.body) {
         var params = {
             TableName: dynamoDbTableName,
-            Key: { "Article ID" : {"S" : request.params.id } },
+            Key: { 'Article ID' : {'S' : request.params.id } },
             AttributeUpdates: getAttributeUpdates(request.body)}
 
         dynamodb.updateItem(params, function (err, data) {
@@ -151,7 +151,7 @@ module.exports.update = function(request, response) {
 module.exports.delete = function(request, response) {
     var params = {
         TableName: dynamoDbTableName,
-        Key: { "Article ID" : {"S" : request.params.id } }}
+        Key: { 'Article ID' : {'S' : request.params.id } }}
 
     dynamodb.deleteItem(params, function(err, data){
         if (data) {
@@ -165,7 +165,7 @@ module.exports.delete = function(request, response) {
 module.exports.scan = function(request, response) {
     var params = {
         TableName: dynamoDbTableName,
-        AttributesToGet: ["Article ID", "Rubrik", "Tekst"],
+        AttributesToGet: ['Article ID', 'Rubrik', 'Tekst'],
         ScanFilter: {}
     }
 
@@ -181,8 +181,8 @@ module.exports.scan = function(request, response) {
 module.exports.query = function(request, response) {
     var params = {
         TableName: dynamoDbTableName,
-        AttributesToGet: ["Article ID", "Rubrik", "Tekst"],
-        //IndexName: "Article ID",
+        AttributesToGet: ['Article ID', 'Rubrik', 'Tekst'],
+        //IndexName: 'Article ID',
         KeyConditions: {
             'Article ID': {
                 AttributeValueList: '',
@@ -215,7 +215,7 @@ module.exports.diff = function(request, response) {
             } else {
                 // If the attributed is completely new, the diff is being made using an empty string as the original
                 output[key] = ansidiff.words(
-                    "",
+                    '',
                     markdown.toHTML(request.body[key]),
                     htmlDiffColorer)
             }
@@ -226,7 +226,7 @@ module.exports.diff = function(request, response) {
             if (request.body[key] === undefined) {
                 output[key] = ansidiff.words(
                     markdown.toHTML(original[key]),
-                    "",
+                    '',
                     htmlDiffColorer)
             }
         }
@@ -237,7 +237,7 @@ module.exports.diff = function(request, response) {
 function getItem(id, callback) {
     var params = {
         TableName: dynamoDbTableName,
-        Key : { "Article ID" : {"S" : id }}}
+        Key : { 'Article ID' : {'S' : id }}}
 
     dynamodb.getItem(params, function (err, data) {
         callback(err, data)
@@ -265,7 +265,7 @@ function flattenAwsItems(items) {
 }
 
 function flattenAwsItem(item) {
-    var temp = { id: item["Article ID"].S}
+    var temp = { id: item['Article ID'].S}
     
     for(var key in item){
         if (item.hasOwnProperty(key)) {

@@ -10,6 +10,11 @@
                 <button type="button" class="btn btn-info btn-xs" ng-click="openEditor(article.id)">Load</button>
                 <abbr ng-attr-title="{{article.Tekst}}" class="">{{article.id}}</abbr>
             </p>
+            <h4>www.b.dk > mest læste</h4>
+            <p ng-repeat="node in nodequeue | filter:query">
+                <button type="button" class="btn btn-info btn-xs" ng-click="openEditor(article.id)">Load</button>
+                <abbr ng-attr-title="{{article.Tekst}}" class="">{{article.id}}</abbr>
+            </p>
             <p>
                 <a href="/ghostdown.html">Ghostdown demo</a>
             </p>
