@@ -2,6 +2,12 @@ var http = require('http')
 
 module.exports.get = get
 
+module.exports.getJson = function(url, callback) {
+    get(url, function(data) {
+        callback(JSON.parse(data))
+    })
+}
+
 function get(url, callback){
 
     http.get(url, function(response) {
@@ -16,20 +22,5 @@ function get(url, callback){
         .on('end', function() {
             callback(body)
         })
-    })
-}
-
-module.exports.getJson = function(url, callback) {
-    
-    console.log(url)
-
-    get(url, function(data) {
-        // try {
-        //     console.log("done")
-            callback(JSON.parse(data))
-        // } catch (err) {
-        //     console.log("err")
-        //     callback(err)
-        // }
     })
 }

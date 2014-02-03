@@ -24,9 +24,9 @@ function DashboardCtrl($scope, $http, $location){
         $scope.articles = data
     })
 
-    $http.get('/api/nodequeue/5').success(function(data)) {
-
-    }
+    $http.get('/api/nodequeue/5').success(function(data) {
+        $scope.nodequeue = data
+    })
 
     $scope.openEditor = function(id) {
         var editUrl = '/edit'
@@ -43,6 +43,8 @@ function ArticleCtrl($scope, $http, $routeParams, $location){
         $http.get('/api/' + $routeParams.articleId).success(function(data){
             if (data.id !== undefined) {
                 $scope.article = data
+                //sessionStorage.setItem("article", JSON.stringify(data))
+                //localStorage.setItem("article", JSON.stringify(data))
             } else {
                 $location.path('/edit')
             }
@@ -93,5 +95,9 @@ function ArticleCtrl($scope, $http, $routeParams, $location){
                 $scope.diffdata = data
             })
         }
+    }
+
+    $scope.copyArticle = function() {
+        
     }
 }

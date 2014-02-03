@@ -4,20 +4,19 @@
             <p>
                 <button class="btn btn-primary btn-sm" ng-click="openEditor()">Ny</button>
             </p>
-            <h4>Artikler</h4>
+            <h4>Artikler i ContentDB</h4>
             <p>Filter: <input class="form-control input-sm" style="width:50%;height:20px;display:inline-block" type="text" ng-model="query"></p>
             <p ng-repeat="article in articles | filter:query">
                 <button type="button" class="btn btn-info btn-xs" ng-click="openEditor(article.id)">Load</button>
                 <abbr ng-attr-title="{{article.Tekst}}" class="">{{article.id}}</abbr>
             </p>
             <h4>www.b.dk > mest læste</h4>
-            <p ng-repeat="node in nodequeue | filter:query">
-                <button type="button" class="btn btn-info btn-xs" ng-click="openEditor(article.id)">Load</button>
-                <abbr ng-attr-title="{{article.Tekst}}" class="">{{article.id}}</abbr>
-            </p>
-            <p>
-                <a href="/ghostdown.html">Ghostdown demo</a>
+            <p ng-repeat="node in nodequeue">
+                <button type="button" class="btn btn-info btn-xs" ng-click="openEditor(node.nodeid)">Load</button>
+                <abbr ng-attr-title="{{node.link}}" class="">{{node.title}}</abbr>
             </p>
         </div>
     </div>
 </div>
+<a href="/ghostdown.html" style="position: absolute; bottom: 0px; left: 0px">Ghostdown demo</a>
+<a href="/" style="position: absolute; bottom: 0px; right: 0px">forside</a>

@@ -7,11 +7,7 @@ var dynamoDbTableName = process.env.DYNAMODB_TABLE_NAME
 var helper = require('./helper.js')
 
 module.exports.get = function(request, response) {
-    var params = {
-        TableName: dynamoDbTableName,
-        Key : { 'Article ID' : {'S' : request.params.id }}}
-
-    dynamodb.getItem(params, function (err, data) {
+    getDynamoDbItem(request.params.id, function (err, data) {
         if (data) {
             if (data.Item) {
                 var article = flattenAwsData(data)
@@ -39,7 +35,6 @@ module.exports.getNodeFromBond = function(request, response) {
             response.send(500, {'message': 'too many nodes found'})
 
         } else {
-
             var node = {
                 nodeid: data.items[0]['0'].value,
                 title: data.items[0].title,
@@ -78,7 +73,7 @@ module.exports.getNodeFromBond = function(request, response) {
                 }
             }
 
-            response.send(200,node)
+            response.send(200, node)
         }
     })
 }
@@ -201,7 +196,7 @@ module.exports.query = function(request, response) {
 }
 
 module.exports.diff = function(request, response) {
-    getItem(request.params.id, function(err, data) {
+    getDynamoDbItem(request.params.id, function(err, data) {
         var original = flattenAwsData(data)
         var output = {}
 
@@ -234,7 +229,7 @@ module.exports.diff = function(request, response) {
     })
 }
 
-function getItem(id, callback) {
+function getDynamoDbItem(id, callback) {
     var params = {
         TableName: dynamoDbTableName,
         Key : { 'Article ID' : {'S' : id }}}
