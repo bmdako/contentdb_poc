@@ -67,9 +67,17 @@ module.exports.getNodeQueueFromBond = function(request, response) {
                     image: (data.items[i]['1']) ? data.items[i]['1'].attributes : undefined
                 }
 
-                for(var j = 0, bound = data.item[i].related.length; j < bound; ++j) {
-                    node.related = {
-                        nodeid: data.items[i].related[j]['0'].value
+                if (data.items[i].related) {
+
+                    node.related = []
+
+                    for(var j = 0, bound = data.items[i].related.length; j < bound; ++j) {
+                        node.related.push({
+                            nodeid: data.items[i].related[j].value['0'].value,
+                            title: data.items[i].related[j].value.title,
+                            link: data.items[i].related[j].value.link,
+                            category: data.items[i].related[j].value.category
+                        })
                     }
                 }
             }
