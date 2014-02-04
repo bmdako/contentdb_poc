@@ -9,14 +9,17 @@
                 <a class="preview" target="_blank" href="/artikel/{{article.id}}">Preview</a>
                 <button class="btn btn-default btn-sm" ng-click="closeEditor()" style="float:right;">Luk</button>
             </p>
-            <p><input class="form-control" type="text" ng-model="article.id" placeholder="ID"/></p>
-            <p><input class="form-control" type="text" ng-model="article.Supertitel" placeholder="Supertitle"/></p>
-            <p><input class="form-control" type="text" ng-model="article.Rubrik" placeholder="Rubrik"/></p>
-            <p><textarea class="form-control" ng-model="article.Summary" rows="3" placeholder="Summary"></textarea></p>
-            <p><textarea class="form-control" ng-model="article.Tekst" rows="20" placeholder="Br&oslash;dtext"></textarea></p>
+            <!-- <p><input class="form-control" type="text" ng-model="article.id" placeholder="ID"/></p> -->
+            <p><input class="form-control" type="text" ng-model="article.category" placeholder="Supertitle"/></p>
+            <p><input class="form-control" type="text" ng-model="article.title" placeholder="Rubrik"/></p>
+            <p><textarea class="form-control" ng-model="article.description" rows="3" placeholder="Summary"></textarea></p>
+            <p><textarea class="form-control" ng-model="article.content" rows="20" placeholder="Br&oslash;dtekst"></textarea></p>
             <p><input class="form-control" type="text" ng-model="article.PrimaryTerm" placeholder="Primary Term"/></p>
             <p><input class="form-control" type="text" ng-model="article.TopicPages" placeholder="Topic Pages"/></p>
-            <p><input class="form-control" type="text" ng-model="article.PresentationTags" placeholder="Pr&aelig;sentations Tags"/></p>
+            <p><input class="form-control" type="text" placeholder="Pr&aelig;sentations Tags"/></p>
+            <ul ng-repeat="tag in article.presentationtags">
+                <li>{{tag}}</li>
+            </ul>
             <p><input class="form-control" type="text" ng-model="article.PrisAbonnement" placeholder="Pris/Abonnement"/></p>
         </div>
     </div>

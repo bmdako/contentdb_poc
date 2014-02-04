@@ -19,12 +19,11 @@ angular.module('contentdb_poc', ['ngRoute', 'ngSanitize'])
 })
 
 function DashboardCtrl($scope, $http, $location){
-
     $http.get('/api/scan').success(function(data) {
         $scope.articles = data
     })
 
-    $http.get('/api/nodequeue/5').success(function(data) {
+    $http.get('/api/nodequeue/210').success(function(data) {
         $scope.nodequeue = data
     })
 
@@ -43,42 +42,46 @@ function ArticleCtrl($scope, $http, $routeParams, $location){
         $http.get('/api/' + $routeParams.articleId).success(function(data){
             if (data.id !== undefined) {
                 $scope.article = data
+                console.log($scope.article)
                 //sessionStorage.setItem("article", JSON.stringify(data))
                 //localStorage.setItem("article", JSON.stringify(data))
             } else {
                 $location.path('/edit')
             }
+        }).error(function(data, status) {
+            if (status === 404) {
+                $http.get('/api/node/' + $routeParams.articleId).success(function(data) {
+                    if (data.id !== undefined) {
+                        $scope.article = data
+                        console.log($scope.article)
+                    } else {
+                        $location.path('/edit')
+                    }
+                })
+            }
         })
     }
 
     $scope.saveArticle = function(){
-        if ($scope.article.id) {
+        if ($scope.article.id && $scope.article.version) {
             $http.put('/api/' + $scope.article.id, $scope.article).success(function(data) {
-                var newArticle = true
-                for(var i = 0, bound = $scope.articles.length; i < bound; ++i) {
-                    if ($scope.articles[i].id === $scope.article.id) {
-                        newArticle = false
-                    }
-                }
-
-                if (newArticle) {
-                    $scope.articles.push($scope.article)
-                }
-
+                // TODO: Show "OK"
+            })
+        } else {
+            $http.post('/api/', $scope.article).success(function(data) {
                 // TODO: Show "OK"
             })
         }
     }
 
     $scope.clearEditor = function() {
-        //$scope.article = {}
         $location.path('/edit')
     }
     
     $scope.deleteArticle = function() {
         if ($scope.article.id) {
             $http.delete('/api/' + $scope.article.id).success(function(data) {
-                $scope.article = {}
+                $location.path('/')
             })
         }
     }

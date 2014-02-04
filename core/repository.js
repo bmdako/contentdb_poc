@@ -7,9 +7,9 @@ var dynamoDbTableName = process.env.DYNAMODB_TABLE_NAME
 var helper = require('./helper.js')
 
 module.exports.get = function(request, response) {
-    getDynamoDbItem(request.params.id, function (err, data) {
+    getDynamoDbItem(request.params.id, request.params.version, function (err, data) {
         if (data) {
-            if (data.Item) {
+            if (data.Item && data.Item.length > 0) {
                 var article = flattenAwsData(data)
                 if (request.query.format === 'html')
                 {
@@ -17,7 +17,7 @@ module.exports.get = function(request, response) {
                 }
                 response.send(200, article)
             } else {
-                response.send(200, data)
+                response.send(404)
             }
         } else {
             response.send(500, err)
@@ -36,11 +36,11 @@ module.exports.getNodeFromBond = function(request, response) {
 
         } else {
             var node = {
-                nodeid: data.items[0]['0'].value,
+                id: data.items[0]['0'].value,
                 title: data.items[0].title,
                 description: data.items[0].description,
                 link: data.items[0].link,
-                pubDate: data.items[0].pubDate,
+                published: data.items[0].pubDate,
                 updated: data.items[0].updated,
                 category: data.items[0].category,
                 content_type: data.items[0].content_type,
@@ -48,7 +48,7 @@ module.exports.getNodeFromBond = function(request, response) {
                 email: data.items[0].email,
                 image: (data.items[0]['1']) ? data.items[0]['1'].attributes : undefined,
                 content: data.items[0]['berlingske:content'],
-                pTags: [],
+                presentationtags: [],
                 related: []
             }
 
@@ -56,7 +56,7 @@ module.exports.getNodeFromBond = function(request, response) {
                 for(var k = 0, bound = data.items[0].fields.length; k < bound; ++k) {
                     switch(data.items[0].fields[k].attributes.keys) {
                         case 'p_tag':
-                            node.pTags.push(data.items[0].fields[k].value)
+                            node.presentationtags.push(data.items[0].fields[k].value)
                             break;
                     }
                 }
@@ -65,7 +65,7 @@ module.exports.getNodeFromBond = function(request, response) {
             if (data.items[0].related) {
                 for(var j = 0, bound = data.items[0].related.length; j < bound; ++j) {
                     node.related.push({
-                        nodeid: data.items[0].related[j].value['0'].value,
+                        id: data.items[0].related[j].value['0'].value,
                         title: data.items[0].related[j].value.title,
                         link: data.items[0].related[j].value.link,
                         category: data.items[0].related[j].value.category
@@ -87,18 +87,20 @@ module.exports.getNodeQueueFromBond = function(request, response) {
         } else {
             var nodequeue = []
             for(var i = 0, bound = data.items.length; i < bound; ++i) {
-                nodequeue.push({
-                    nodeid: data.items[i]['0'].value,
-                    title: data.items[i].title,
-                    link: data.items[i].link,
-                    pubDate: data.items[i].pubDate,
-                    //updated: data.items[i].updated,
-                    category: data.items[i].category,
-                    content_type: data.items[i].content_type,
-                    author: data.items[i].author,
-                    email: data.items[i].email,
-                    image: (data.items[i]['1']) ? data.items[i]['1'].attributes : undefined
-                })
+                if (['news_article'].contains(data.items[i].content_type)) {
+                    nodequeue.push({
+                        id: data.items[i]['0'].value,
+                        title: data.items[i].title,
+                        link: data.items[i].link,
+                        published: data.items[i].pubDate,
+                        //updated: data.items[i].updated,
+                        category: data.items[i].category,
+                        content_type: data.items[i].content_type,
+                        author: data.items[i].author,
+                        email: data.items[i].email,
+                        image: (data.items[i]['1']) ? data.items[i]['1'].attributes : undefined
+                    })
+                }
             }
 
             response.send(nodequeue)
@@ -106,29 +108,61 @@ module.exports.getNodeQueueFromBond = function(request, response) {
     })
 }
 
-module.exports.save = function(request, response) {
-    response.send(501)
-    // var id = guid()
-    // var params = {
-    //     TableName: dynamoDbTableName,
-    //     Item: {
-    //         'Article ID' : {'S' : id }, 
-    //         'Article': {'S' : article }}}
+Array.prototype.contains = function(obj) {
+    var i = this.length;
+    while (i--) {
+        if (this[i] === obj) {
+            return true;
+        }
+    }
+    return false;
+}
 
-    // dynamodb.putItem(params, function (err, data) {
-    //     if (data) {
-    //         response.send(200, data)
-    //     } else {
-    //         response.send(500, err)
-    //     }
-    // })
+module.exports.save = function(request, response) {
+    if (request.body) {
+        
+        // TODO: Check for current version
+
+        var params = {
+            TableName: dynamoDbTableName,
+            Item: getItemInserts(request.body)
+        }
+
+        if (params.Item.id === undefined || params.Item.id.S === undefined) {
+            params.Item.id = { S: guid() }
+            params.Item.version = { S: '1' }
+        } else {
+            // Use update then updating an existing article
+            response.send(400)
+        }
+
+        dynamodb.putItem(params, function (err, data) {
+            if (data) {
+                response.send(200, data)
+            } else {
+                response.send(500, err)
+            }
+        })
+    }
 }
 
 module.exports.update = function(request, response) {
     if (request.body) {
+
+        /* Finding the current version of the article */
+        // var params = {
+        //     TableName: dynamoDbTableName,
+        //     Key : { 'id' : { S : id }, 'version' : { N: '1'}},
+        //     AttributesToGet: ['id', 'version']}
+
+        // dynamodb.getItem(params, function (err, data) {
+        //     callback(err, data)
+        // })
+
+
         var params = {
             TableName: dynamoDbTableName,
-            Key: { 'Article ID' : {'S' : request.params.id } },
+            Key: { 'id' : { S: request.params.id }, 'version': { S: '1' }},
             AttributeUpdates: getAttributeUpdates(request.body)}
 
         dynamodb.updateItem(params, function (err, data) {
@@ -146,9 +180,9 @@ module.exports.update = function(request, response) {
 module.exports.delete = function(request, response) {
     var params = {
         TableName: dynamoDbTableName,
-        Key: { 'Article ID' : {'S' : request.params.id } }}
+        Key: { 'id' : { S : request.params.id }, 'version': { N: '1' }}}
 
-    dynamodb.deleteItem(params, function(err, data){
+    dynamodb.deleteItem(params, function(err, data) {
         if (data) {
             response.send(200, data)
         } else {
@@ -160,13 +194,25 @@ module.exports.delete = function(request, response) {
 module.exports.scan = function(request, response) {
     var params = {
         TableName: dynamoDbTableName,
-        AttributesToGet: ['Article ID', 'Rubrik', 'Tekst'],
-        ScanFilter: {}
-    }
+        AttributesToGet: ['id', 'title', 'content', 'author', 'version'] }
 
+    if (request.params.id) {
+        params.ScanFilter = {
+            'id': {
+                AttributeValueList: [{ S: request.params.id }],
+                ComparisonOperator: 'EQ'
+            }
+        }
+    }
     dynamodb.scan(params, function(err, data){
         if (data) {
-            response.send(200, flattenAwsData(data))
+            if (data.Items.length === 0) {
+                response.send(404)
+            } else if (data.Items.length === 1) {
+                response.send(200, flattenAwsItem(data.Items[0]))
+            } else {
+                response.send(200, flattenAwsData(data))
+            }
         } else {
             response.send(500, err)
         }
@@ -176,17 +222,23 @@ module.exports.scan = function(request, response) {
 module.exports.query = function(request, response) {
     var params = {
         TableName: dynamoDbTableName,
-        AttributesToGet: ['Article ID', 'Rubrik', 'Tekst'],
+        IndexName: 'author-index',
+        AttributesToGet: ['id', 'version', 'author'],
         //IndexName: 'Article ID',
         KeyConditions: {
-            'Article ID': {
-                AttributeValueList: '',
-                ComparisonOperator: 'Russiske'
+            'id': {
+                AttributeValueList: [{ S: request.query.id },],
+                ComparisonOperator: 'EQ'
             }
+            // ,
+            // 'author': {
+            //     AttributeValueList: [{ S: 'Thomas' },],
+            //     ComparisonOperator: 'EQ'
+            // }
         }
     }
 
-    dynamodb.query(params, function(err, data){
+    dynamodb.query(params, function(err, data) {
         if (data) {
             response.send(200, flattenAwsData(data))
         } else {
@@ -196,7 +248,7 @@ module.exports.query = function(request, response) {
 }
 
 module.exports.diff = function(request, response) {
-    getDynamoDbItem(request.params.id, function(err, data) {
+    getDynamoDbItem(request.params.id, '1', function(err, data) {
         var original = flattenAwsData(data)
         var output = {}
 
@@ -229,10 +281,10 @@ module.exports.diff = function(request, response) {
     })
 }
 
-function getDynamoDbItem(id, callback) {
+function getDynamoDbItem(id, version, callback) {
     var params = {
         TableName: dynamoDbTableName,
-        Key : { 'Article ID' : {'S' : id }}}
+        Key : { 'id' : { S : id }, 'version' : { S: version }}}
 
     dynamodb.getItem(params, function (err, data) {
         callback(err, data)
@@ -260,7 +312,7 @@ function flattenAwsItems(items) {
 }
 
 function flattenAwsItem(item) {
-    var temp = { id: item['Article ID'].S}
+    var temp = { id: item.id.S}
     
     for(var key in item){
         if (item.hasOwnProperty(key)) {
@@ -295,36 +347,95 @@ function flattenAwsItem(item) {
     return temp
 }
 
+function getItemInserts(body) {
+    var ItemInserts = {}
+    
+    for(var key in body){
+        if (body.hasOwnProperty(key)) {
+            
+            switch (typeof(body[key])) {
+                case 'string':
+                    if (body[key] === '') {
+                    } else {
+                        ItemInserts[key] = { S: body[key] }
+                    }
+                    break
+                case 'number':
+                    ItemInserts[key] = { N: body[key]}
+                    break
+                case 'B': // TODO (Base64 Encoded String)
+                    ItemInserts[key] = { B: body[key] }
+                    break
+                case 'object':
+                    if (body[key] instanceof Array) {
+                        if (body[key].length > 0) {
+                            switch (typeof(body[key][0])) {
+                                case 'string':
+                                    ItemInserts[key] = { SS: body[key] }
+                                    break
+                                case 'number':
+                                    ItemInserts[key] = { NS: body[key] }
+                                    break
+                            }
+                        }
+                    }
+                    break
+                case 'BS': // TODO (Array<Base64 Encoded String>)
+                    ItemInserts[key] = { BS: body[key] }
+                    break
+                default:
+                    ItemInserts[key] = { S: body[key] }
+                    break
+            }
+        }
+    }
+
+    return ItemInserts
+}
+
 function getAttributeUpdates(body) {
     var AttributeUpdates = {}
     
     for(var key in body){
-        if (body.hasOwnProperty(key) && key !== 'id' && key !== 'Article ID') {
+        if (body.hasOwnProperty(key) && key !== 'id' && key !== 'version') {
             
             AttributeUpdates[key] = {}
-            
-            switch(typeof(body[key])) {
+
+            switch (typeof(body[key])) {
                 case 'string':
                     if (body[key] === '') {
                         AttributeUpdates[key].Action = 'DELETE'
                     } else {
-                        AttributeUpdates[key].Value = {S: body[key]}
+                        AttributeUpdates[key].Value = { S: body[key] }
                     }
                     break
                 case 'number':
-                    AttributeUpdates[key].Value = {N: body[key]}
+                    AttributeUpdates[key].Value = { N: body[key] }
                     break
-                case 'B': // TODO
-                    AttributeUpdates[key].Value = {B: body[key]}
+                case 'B': // TODO (Base64 Encoded String)
+                    AttributeUpdates[key].Value = { B: body[key] }
                     break
-                case 'SS': // TODO
-                    AttributeUpdates[key].Value = {SS: body[key]}
+                case 'object':
+                    if (body[key] instanceof Array) {
+                        if (body[key].length === 0) {
+                            AttributeUpdates[key].Action = 'DELETE'
+                        } else {
+                            switch (typeof(body[key][0])) {
+                                case 'string':
+                                    AttributeUpdates[key].Value = { SS: body[key] }
+                                    break
+                                case 'number':
+                                    AttributeUpdates[key].Value = { NS: body[key] }
+                                    break
+                            }
+                        }
+                    }
                     break
-                case 'NS': // TODO
-                    AttributeUpdates[key].Value = {NS: body[key]}
+                case 'BS': // TODO (Array<Base64 Encoded String>)
+                    AttributeUpdates[key].Value = { BS: body[key] }
                     break
                 default:
-                    AttributeUpdates[key].Value = {S: body[key]}
+                    AttributeUpdates[key].Value = { S: body[key] }
                     break
             }
         }

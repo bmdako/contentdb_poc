@@ -8,6 +8,11 @@ h4
 	margin-top: 35px;
 }
 
+span.authorlabel
+{
+	font-size: small;
+}
+
 span.added
 {
 	background-color: lightgreen;

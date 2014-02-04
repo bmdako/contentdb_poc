@@ -13,18 +13,24 @@ app.get('/editor', function(request, response){
 	response.sendfile('./client/editor.html')
 })
 
-app.get('/:id', site.visArtikel)
-app.get('/artikel/:id', site.visArtikel)
-app.get('/sektion/*', site.visSektion)
-app.get('/api/scan', repository.scan)
+app.get('/api', function(request, response) {
+	response.send(400)
+})
+app.post('/api', repository.save)
 app.get('/api/query', repository.query)
-app.get('/api/:id', repository.get)
 app.get('/api/node/:id', repository.getNodeFromBond)
 app.get('/api/nodequeue/:id', repository.getNodeQueueFromBond)
-app.post('/api', repository.save)
 app.put('/api/diff/:id', repository.diff)
+app.get('/api/scan', repository.scan)
+app.get('/api/scan/:id', repository.scan)
+app.get('/api/:id', repository.scan)
+app.get('/api/:id/:version', repository.get)
 app.put('/api/:id', repository.update)
 app.delete('/api/:id', repository.delete)
+
+app.get('/artikel/:id', site.visArtikel)
+app.get('/sektion/*', site.visSektion)
+app.get('/:id', site.visArtikel)
 
 var port = process.env.PORT || 5000
 app.listen(port, function() {
