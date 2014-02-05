@@ -13,7 +13,7 @@ module.exports.get = function(request, response) {
                 var article = flattenAwsData(data)
                 if (request.query.format === 'html')
                 {
-                    article['Tekst'] = markdown.toHTML(article['Tekst'])
+                    article.content = markdown.toHTML(article.content)
                 }
                 response.send(200, article)
             } else {
@@ -53,7 +53,7 @@ module.exports.getNodeFromBond = function(request, response) {
             }
 
             if (data.items[0].fields) {
-                for(var k = 0, bound = data.items[0].fields.length; k < bound; ++k) {
+                for(var k = 0; k < data.items[0].fields.length; ++k) {
                     switch(data.items[0].fields[k].attributes.keys) {
                         case 'p_tag':
                             node.presentationtags.push(data.items[0].fields[k].value)
@@ -63,7 +63,7 @@ module.exports.getNodeFromBond = function(request, response) {
             }            
 
             if (data.items[0].related) {
-                for(var j = 0, bound = data.items[0].related.length; j < bound; ++j) {
+                for(var j = 0; j < data.items[0].related.length; ++j) {
                     node.related.push({
                         id: data.items[0].related[j].value['0'].value,
                         title: data.items[0].related[j].value.title,
@@ -86,7 +86,7 @@ module.exports.getNodeQueueFromBond = function(request, response) {
         
         } else {
             var nodequeue = []
-            for(var i = 0, bound = data.items.length; i < bound; ++i) {
+            for(var i = 0; i < data.items.length; ++i) {
                 if (['news_article'].contains(data.items[i].content_type)) {
                     nodequeue.push({
                         id: data.items[i]['0'].value,
