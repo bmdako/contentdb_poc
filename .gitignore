@@ -3,3 +3,4 @@ config.sh
 node_modules/*
 npm-debug.log
 .elasticbeanstalk/
+*.sublime-*
