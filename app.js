@@ -9,8 +9,8 @@ var repository = require('./core/repository.js');
 var site = require('./core/site.js');
 
 app.get('/', site.visForside);
-app.get('/editor', function(request, response){
-	response.sendfile('./client/editor.html');
+app.get('/edit', function(request, response){
+	response.sendfile('./client/edit.html');
 });
 
 app.get('/api', function(request, response) {
@@ -22,6 +22,12 @@ app.get('/api/node/:id', repository.getNodeFromBond);
 app.get('/api/nodequeue/:id', repository.getNodeQueueFromBond);
 app.put('/api/diff/:id', repository.diff);
 app.get('/api/scan', repository.scan);
+app.put('/api/scan', function(request, response) {
+	response.send(400)
+});
+app.post('/api/scan', function(request, response) {
+	response.send(400)
+});
 app.get('/api/:id', repository.scan);
 app.get('/api/:id/:version', repository.get);
 app.put('/api/:id', repository.update);

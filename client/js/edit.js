@@ -1,19 +1,18 @@
 angular.module('contentdb_poc', ['ngRoute', 'ngSanitize'])
 
 .config(function($routeProvider, $locationProvider) {
-
     $routeProvider.when('/', {
         templateUrl: 'editor_partials/dashboard.html',
         controller: DashboardCtrl
     });
 
     $routeProvider.when('/edit/', {
-        templateUrl: 'editor_partials/edit.html',
+        templateUrl: 'editor_partials/editor.html',
         controller: ArticleCtrl
     });
 
     $routeProvider.when('/edit/:articleId', {
-        templateUrl: 'editor_partials/edit.html',
+        templateUrl: 'editor_partials/editor.html',
         controller: ArticleCtrl
     });
 });

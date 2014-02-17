@@ -197,6 +197,7 @@ module.exports.update = function(request, response) {
 };
 
 module.exports.delete = function(request, response) {
+    console.log(request)
     var params = {
         TableName: dynamoDbTableName,
         Key: { 'id' : { S : request.params.id }, 'version': { N: '1' }}};
