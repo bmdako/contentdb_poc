@@ -1,4 +1,4 @@
-#editor_partials_view
+#edit_partials_view
 {
 	margin-top: 80px;
 }
@@ -14,7 +14,7 @@ span.authorlabel
 	margin-left: 45px;
 }
 
-span.added
+span.addeditor_partials_viewed
 {
 	background-color: lightgreen;
 }
