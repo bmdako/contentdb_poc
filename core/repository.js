@@ -213,8 +213,9 @@ module.exports.delete = function(request, response) {
 
 module.exports.scan = function(request, response) {
     var params = {
-        TableName: dynamoDbTableName,
-        AttributesToGet: ['id', 'title', 'author', 'content', 'version']};
+        TableName: dynamoDbTableName//,
+        //AttributesToGet: ['id', 'title', 'author', 'content', 'version']
+        };
 
     if (request.params.id) {
         params.ScanFilter = {

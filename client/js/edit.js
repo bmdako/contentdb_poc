@@ -1,23 +1,22 @@
 angular.module('contentdb_poc', ['ngRoute', 'ngSanitize'])
+    .config(function($routeProvider, $locationProvider) {
+        $routeProvider.when('/', {
+            templateUrl: 'edit_partials/dashboard.html',
+            controller: DashboardCtrl
+        });
 
-.config(function($routeProvider, $locationProvider) {
-    $routeProvider.when('/', {
-        templateUrl: 'edit_partials/dashboard.html',
-        controller: DashboardCtrl
+        $routeProvider.when('/edit/', {
+            templateUrl: 'edit_partials/editor.html',
+            controller: ArticleCtrl
+        });
+
+        $routeProvider.when('/edit/:articleId', {
+            templateUrl: 'edit_partials/editor.html',
+            controller: ArticleCtrl
+        });
     });
 
-    $routeProvider.when('/edit/', {
-        templateUrl: 'edit_partials/editor.html',
-        controller: ArticleCtrl
-    });
-
-    $routeProvider.when('/edit/:articleId', {
-        templateUrl: 'edit_partials/editor.html',
-        controller: ArticleCtrl
-    });
-});
-
-function DashboardCtrl($scope, $http, $location){
+function DashboardCtrl($scope, $http, $location) {
     $http.get('/api/scan').success(function(data) {
         $scope.articles = data;
     });
@@ -50,9 +49,9 @@ function DashboardCtrl($scope, $http, $location){
     }
 }
 
-function ArticleCtrl($scope, $http, $routeParams, $location){
+function ArticleCtrl($scope, $http, $routeParams, $location) {
     if ($routeParams.articleId) {
-        $http.get('/api/' + $routeParams.articleId).success(function(data){
+        $http.get('/api/' + $routeParams.articleId).success(function(data) {
             if (data.id !== undefined) {
                 $scope.article = data;
                 console.log($scope.article);
@@ -75,7 +74,9 @@ function ArticleCtrl($scope, $http, $routeParams, $location){
         });
     }
 
-    $scope.saveArticle = function(){
+    $scope.saveArticle = function() {
+        console.log("save")
+        console.log($scope.article)
         if ($scope.article.id && $scope.article.version) {
             $http.put('/api/' + $scope.article.id, $scope.article).success(function(data) {
                 // TODO: Show "OK"

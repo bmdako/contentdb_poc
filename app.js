@@ -6,10 +6,8 @@ app.use(express.favicon());
 app.use('/', express.static('./client'));
 
 var repository = require('./core/repository.js');
-var site = require('./core/site.js');
 
-app.get('/', site.visForside);
-app.get('/edit', function(request, response){
+app.get('/', function(request, response){
 	response.sendfile('./client/edit.html');
 });
 
@@ -33,9 +31,10 @@ app.get('/api/:id/:version', repository.get);
 app.put('/api/:id', repository.update);
 app.delete('/api/:id', repository.delete);
 
-app.get('/artikel/:id', site.visArtikel);
-app.get('/sektion/*', site.visSektion);
-app.get('/:id', site.visArtikel);
+app.get("/oauth2callback", function(request, response){
+	console.log("oauth2callback");
+	console.log(request);
+});
 
 var port = process.env.PORT || 5000;
 app.listen(port, function() {

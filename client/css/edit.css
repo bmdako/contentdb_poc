@@ -1,4 +1,4 @@
-#edit_partials_view
+body
 {
 	margin-top: 80px;
 }
@@ -23,4 +23,11 @@ span.removed
 {
 	/*text-decoration: line-through;*/
 	background-color: red;
+}
+
+#profile
+{
+	position: absolute;
+	top: 0px;
+	right: 0px;
 }
