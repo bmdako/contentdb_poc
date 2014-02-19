@@ -1,10 +1,18 @@
 var MongoClient = require('mongodb').MongoClient
   , Server = require('mongodb').Server;
+var mongoClient = new MongoClient(new Server('localhost', 27017));
 
-//127.0.0.1:49255
-var mongoClient = new MongoClient(new Server('localhost', 49255));
-mongoClient.open(function(err, mongoClient) {
-  var db1 = mongoClient.db("mydb");
+module.exports.test = function(request, response) {
+	mongoClient.open(function(err, mongoClient) {
+		if (err) {
+			response.send(505, err);
+		}
 
-  mongoClient.close();
-});
+	  	var db1 = mongoClient.db("test");
+	  	db1.collection("unicorns").find().toArray(function(err, docs) {
+	  		mongoClient.close();
+    		response.send(200, docs);
+	  	});
+
+	});
+};

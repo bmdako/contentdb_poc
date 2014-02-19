@@ -6,6 +6,7 @@ app.use(express.favicon());
 app.use('/', express.static('./client'));
 
 var dynamodb = require('./core/dynamodb.js');
+var mongodb = require('./core/mongodb.js');
 
 app.get('/', function(request, response){
 	response.sendfile('./client/edit.html');
@@ -35,6 +36,8 @@ app.get("/oauth2callback", function(request, response){
 	console.log("oauth2callback");
 	console.log(request);
 });
+
+app.get("/mongodb", mongodb.test);
 
 var port = process.env.PORT || 5000;
 app.listen(port, function() {
