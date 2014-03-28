@@ -13,8 +13,7 @@
     "markdown": "*",
     "ansidiff": "*",
     "aws-sdk": "*",
-    "mongodb": "*",
-    "bliss": "*"
+    "mongodb": "*"
   },
   "repository": {
     "type": "git",
